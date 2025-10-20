@@ -1,4 +1,5 @@
 use crate::account::helpers::misc::get_selected_player_info;
+use crate::account::helpers::offline::yggdrasil_server::YggdrasilServer;
 use crate::account::helpers::{authlib_injector, microsoft};
 use crate::account::models::PlayerType;
 use crate::error::SJMCLResult;
@@ -186,6 +187,7 @@ pub async fn validate_game_files(
 pub async fn validate_selected_player(
   app: AppHandle,
   launching_queue_state: State<'_, Mutex<Vec<LaunchingState>>>,
+  yggdrasil_server_state: State<'_, Mutex<YggdrasilServer>>,
 ) -> SJMCLResult<bool> {
   let player = get_selected_player_info(&app)?;
 
@@ -206,6 +208,13 @@ pub async fn validate_selected_player(
       .to_string();
 
       launching.auth_server_meta = meta;
+    } else if player.player_type == PlayerType::Offline {
+      launching.auth_server_meta = yggdrasil_server_state.lock()?.metadata.to_string();
+
+      {
+        let yggdrasil_server = yggdrasil_server_state.lock()?;
+        yggdrasil_server.apply_player(player.clone());
+      }
     }
   }
 

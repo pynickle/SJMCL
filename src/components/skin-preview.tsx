@@ -3,6 +3,7 @@ import {
   BoxProps,
   Flex,
   HStack,
+  Icon,
   IconButton,
   Popover,
   PopoverBody,
@@ -11,6 +12,7 @@ import {
   Switch,
   Text,
   Tooltip,
+  VStack,
 } from "@chakra-ui/react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -24,6 +26,7 @@ import {
 } from "react-icons/fa6";
 import {
   LuChevronUp,
+  LuCircleX,
   LuPause,
   LuPlay,
   LuRefreshCw,
@@ -70,20 +73,29 @@ const SkinPreview: React.FC<SkinPreviewProps> = ({
   const [autoRotate, setAutoRotate] = useState(false);
   const [isPlaying, setIsPlaying] = useState(true);
   const [isCapeVisible, setIsCapeVisible] = useState(showCape);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   useEffect(() => {
     setIsCapeVisible(showCape);
   }, [showCape]);
 
   useEffect(() => {
-    if (skinViewer && skinSrc) {
-      skinViewer.loadSkin(skinSrc);
-      if (isCapeVisible && capeSrc) {
-        skinViewer.loadCape(capeSrc);
-      } else {
-        skinViewer.loadCape(null);
+    (async () => {
+      try {
+        if (skinViewer && skinSrc) {
+          await skinViewer.loadSkin(skinSrc);
+          if (isCapeVisible && capeSrc) {
+            await skinViewer.loadCape(capeSrc);
+          } else {
+            skinViewer.resetCape();
+          }
+        }
+      } catch (error) {
+        skinViewer?.resetSkin();
+        skinViewer?.resetCape();
+        setErrorMessage(error instanceof Error ? error.message : String(error));
       }
-    }
+    })();
   }, [skinViewer, skinSrc, capeSrc, isCapeVisible]);
 
   // animation
@@ -230,7 +242,19 @@ const SkinPreview: React.FC<SkinPreviewProps> = ({
 
   return (
     <Box {...props}>
-      <canvas ref={canvasRef} />
+      {errorMessage ? (
+        <VStack
+          width={width}
+          height={height - 40}
+          justifyContent="center"
+          spacing={4}
+        >
+          <Icon as={LuCircleX} boxSize={12} color="red.500" />
+          <Text className="secondary-text">{errorMessage}</Text>
+        </VStack>
+      ) : (
+        <canvas ref={canvasRef} />
+      )}
       {showControlBar && (
         <Flex alignItems="center" justifyContent="space-between" mt={2}>
           <HStack spacing={0}>

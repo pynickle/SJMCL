@@ -1,4 +1,5 @@
 use crate::account::helpers::authlib_injector::jar::get_jar_path as get_authlib_injector_jar_path;
+use crate::account::helpers::offline::yggdrasil_server::YggdrasilServer;
 use crate::account::models::{AccountError, PlayerType};
 use crate::error::{SJMCLError, SJMCLResult};
 use crate::instance::helpers::client_json::FeaturesInfo;
@@ -99,6 +100,7 @@ pub async fn generate_launch_command(
 ) -> SJMCLResult<LaunchCommand> {
   let launcher_config = { app.state::<Mutex<LauncherConfig>>().lock()?.clone() };
   let launching_queue = { app.state::<Mutex<Vec<LaunchingState>>>().lock()?.clone() };
+  let yggdrasil_server = { app.state::<Mutex<YggdrasilServer>>().lock()?.clone() };
 
   let LauncherConfig { basic_info, .. } = launcher_config;
   let launching = launching_queue
@@ -267,11 +269,16 @@ pub async fn generate_launch_command(
   // TODO: lwjgl non-ASCII path fix (HMCL DefaultLauncher.java#L236)
 
   // authlib-injector login
-  if selected_player.player_type == PlayerType::ThirdParty {
+  if selected_player.player_type == PlayerType::ThirdParty
+    || selected_player.player_type == PlayerType::Offline
+  {
     cmd.push(format!(
       "-javaagent:{}={}",
       get_authlib_injector_jar_path(app)?.to_string_lossy(),
-      selected_player.auth_server_url.clone().unwrap_or_default()
+      selected_player
+        .auth_server_url
+        .clone()
+        .unwrap_or(yggdrasil_server.root_url.clone())
     ));
     cmd.push("-Dauthlibinjector.side=client".to_string());
     cmd.push(format!(

@@ -1330,7 +1330,11 @@
     "skinManage": "Manage Skin",
     "default": "Default",
     "steve": "Steve",
-    "alex": "Alex"
+    "alex": "Alex",
+    "upload": "Upload",
+    "uploadSkin": "Upload Skin",
+    "uploadCape": "Upload Cape",
+    "thinModel": "Thin Skin"
   },
   "ManualAddJavaPathModal": {
     "modal": {
@@ -1929,6 +1933,16 @@
             "NOT_FOUND": "The player does not exist",
             "INVALID": "The player type is invalid",
             "TEXTURE_ERROR": "Unable to get player texture"
+          }
+        }
+      },
+      "updatePlayerSkinOfflineLocal": {
+        "success": "Successfully updated player skin",
+        "error": {
+          "title": "Failed to update player skin",
+          "description": {
+            "NOT_FOUND": "The player does not exist",
+            "INVALID": "The player type is invalid"
           }
         }
       },
