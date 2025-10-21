@@ -4,6 +4,9 @@ import {
   FormControl,
   FormLabel,
   Grid,
+  HStack,
+  IconButton,
+  Input,
   Modal,
   ModalBody,
   ModalCloseButton,
@@ -14,7 +17,6 @@ import {
   ModalProps,
   Radio,
   RadioGroup,
-  Switch,
   Text,
   VStack,
 } from "@chakra-ui/react";
@@ -22,17 +24,18 @@ import { convertFileSrc } from "@tauri-apps/api/core";
 import { open } from "@tauri-apps/plugin-dialog";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { LuUpload } from "react-icons/lu";
+import { LuFolderOpen } from "react-icons/lu";
+import SegmentedControl from "@/components/common/segmented";
 import SkinPreview from "@/components/skin-preview";
 import { useLauncherConfig } from "@/contexts/config";
 import { useGlobalData } from "@/contexts/global-data";
 import { useToast } from "@/contexts/toast";
-import { SkinModel, TextureType } from "@/enums/account";
-import { PresetSkinType, Texture } from "@/models/account";
+import { PresetRole, SkinModel, TextureType } from "@/enums/account";
+import { Texture } from "@/models/account";
 import { AccountService } from "@/services/account";
 import { base64ImgSrc } from "@/utils/string";
 
-type SkinType = PresetSkinType | "default" | "upload";
+type SkinType = PresetRole | "default" | "upload";
 
 interface ManageSkinModalProps extends Omit<ModalProps, "children"> {
   playerId: string;
@@ -49,12 +52,8 @@ const ManageSkinModal: React.FC<ManageSkinModalProps> = ({
   ...modalProps
 }) => {
   const [selectedSkin, setSelectedSkin] = useState<SkinType>("default");
-  const [uploadSkinFilePath, setUploadSkinFilePath] = useState<string | null>(
-    null
-  );
-  const [uploadCapeFilePath, setUploadCapeFilePath] = useState<string | null>(
-    null
-  );
+  const [uploadSkinFilePath, setUploadSkinFilePath] = useState<string>("");
+  const [uploadCapeFilePath, setUploadCapeFilePath] = useState<string>("");
   const [skinModel, setSkinModel] = useState<SkinModel>(SkinModel.Default);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const { t } = useTranslation();
@@ -64,10 +63,16 @@ const ManageSkinModal: React.FC<ManageSkinModalProps> = ({
   const primaryColor = config.appearance.theme.primaryColor;
 
   const skinOptions = {
-    default: base64ImgSrc(skin?.image || ""),
-    steve: "/images/skins/steve.png",
-    alex: "/images/skins/alex.png",
-    upload: uploadSkinFilePath ? convertFileSrc(uploadSkinFilePath) : "",
+    default: {
+      src: base64ImgSrc(skin?.image || ""),
+      model: skin?.model || SkinModel.Default,
+    },
+    steve: { src: "/images/skins/steve.png", model: SkinModel.Default },
+    alex: { src: "/images/skins/alex.png", model: SkinModel.Slim },
+    upload: {
+      src: uploadSkinFilePath ? convertFileSrc(uploadSkinFilePath) : "",
+      model: skinModel,
+    },
   };
 
   useEffect(() => {
@@ -77,8 +82,8 @@ const ManageSkinModal: React.FC<ManageSkinModalProps> = ({
   useEffect(() => {
     if (!isOpen && selectedSkin === "upload") {
       setSelectedSkin(skin?.preset || "default");
-      setUploadSkinFilePath(null);
-      setUploadCapeFilePath(null);
+      setUploadSkinFilePath("");
+      setUploadCapeFilePath("");
       setSkinModel(SkinModel.Default);
     }
   }, [isOpen, selectedSkin, skin?.preset]);
@@ -192,7 +197,11 @@ const ManageSkinModal: React.FC<ManageSkinModalProps> = ({
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      size={{ base: "md", lg: "lg", xl: "xl" }}
+      size={
+        selectedSkin === "upload"
+          ? { base: "2xl", lg: "3xl", xl: "4xl" }
+          : { base: "md", lg: "lg", xl: "xl" }
+      }
       {...modalProps}
     >
       <ModalOverlay />
@@ -200,10 +209,11 @@ const ManageSkinModal: React.FC<ManageSkinModalProps> = ({
         <ModalHeader>{t("ManageSkinModal.skinManage")}</ModalHeader>
         <ModalCloseButton />
         <ModalBody width="100%">
-          <Grid templateColumns="3fr 2fr" gap={4} h="320px">
+          <Grid templateColumns="3fr 2fr" gap={4} h="320px" width="100%">
             <Flex justify="center" align="center" height="100%">
               <SkinPreview
-                skinSrc={skinOptions[selectedSkin]}
+                skinSrc={skinOptions[selectedSkin].src}
+                skinModel={skinOptions[selectedSkin].model}
                 capeSrc={
                   selectedSkin === "default" && cape
                     ? base64ImgSrc(cape.image)
@@ -232,63 +242,70 @@ const ManageSkinModal: React.FC<ManageSkinModalProps> = ({
               </RadioGroup>
               {selectedSkin === "upload" && (
                 <VStack spacing={2} alignItems="flex-start" width="100%">
-                  <FormControl>
-                    <FormLabel htmlFor="uploadSkin">
-                      {t("ManageSkinModal.uploadSkin")}
+                  <FormControl display="flex" gap={2} alignItems="center">
+                    <FormLabel htmlFor="model" mb={0}>
+                      {t("ManageSkinModal.model.label")}
                     </FormLabel>
-                    <Button
-                      id="uploadSkin"
-                      onClick={handleUploadSkinFile}
-                      variant="outline"
-                      leftIcon={<LuUpload />}
-                      width="100%"
-                      size="xs"
-                    >
-                      <Text
-                        textOverflow="ellipsis"
-                        isTruncated
-                        overflow="hidden"
-                        flex={1}
-                      >
-                        {uploadSkinFilePath || t("ManageSkinModal.upload")}
-                      </Text>
-                    </Button>
+                    <SegmentedControl
+                      id="model"
+                      size="sm"
+                      selected={skinModel}
+                      onSelectItem={(value) => setSkinModel(value as SkinModel)}
+                      items={[
+                        {
+                          label: t("ManageSkinModal.model.default"),
+                          value: SkinModel.Default,
+                        },
+                        {
+                          label: t("ManageSkinModal.model.slim"),
+                          value: SkinModel.Slim,
+                        },
+                      ]}
+                    />
                   </FormControl>
-                  <FormControl display="flex" alignItems="center">
-                    <FormLabel htmlFor="thinModel" mb={0}>
-                      {t("ManageSkinModal.thinModel")}
+                  <FormControl display="flex" gap={2} alignItems="center">
+                    <FormLabel htmlFor="skin" mb={0} minWidth="max-content">
+                      {t("ManageSkinModal.skin")}
                     </FormLabel>
-                    <Switch
-                      id="thinModel"
-                      isChecked={skinModel === SkinModel.Slim}
-                      onChange={(e) =>
-                        setSkinModel(
-                          e.target.checked ? SkinModel.Slim : SkinModel.Default
-                        )
-                      }
-                    ></Switch>
-                  </FormControl>
-                  <FormControl>
-                    <FormLabel htmlFor="uploadCape">
-                      {t("ManageSkinModal.uploadCape")}
-                    </FormLabel>
-                    <Button
-                      id="uploadCape"
-                      onClick={handleUploadCapeFile}
-                      variant="outline"
-                      leftIcon={<LuUpload />}
-                      width="100%"
-                      size="xs"
-                    >
-                      <Text
-                        textOverflow="ellipsis"
-                        isTruncated
-                        overflow="hidden"
+                    <HStack id="skin" spacing={2} width="100%">
+                      <Input
+                        value={uploadSkinFilePath}
+                        onChange={(e) => setUploadSkinFilePath(e.target.value)}
                         flex={1}
+                        variant="filled"
+                      />
+                      <IconButton
+                        onClick={handleUploadSkinFile}
+                        variant="ghost"
+                        width="100%"
+                        aria-label={t("ManageSkinModal.upload")}
+                        flex={0}
                       >
-                        {uploadCapeFilePath || t("ManageSkinModal.upload")}
-                      </Text>
-                    </Button>
+                        <LuFolderOpen />
+                      </IconButton>
+                    </HStack>
+                  </FormControl>
+                  <FormControl display="flex" gap={2} alignItems="center">
+                    <FormLabel htmlFor="cape" mb={0} minWidth="max-content">
+                      {t("ManageSkinModal.cape")}
+                    </FormLabel>
+                    <HStack id="cape" spacing={2} width="100%">
+                      <Input
+                        value={uploadCapeFilePath}
+                        onChange={(e) => setUploadCapeFilePath(e.target.value)}
+                        flex={1}
+                        variant="filled"
+                      />
+                      <IconButton
+                        onClick={handleUploadCapeFile}
+                        variant="ghost"
+                        width="100%"
+                        aria-label={t("ManageSkinModal.upload")}
+                        flex={0}
+                      >
+                        <LuFolderOpen />
+                      </IconButton>
+                    </HStack>
                   </FormControl>
                 </VStack>
               )}

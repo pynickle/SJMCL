@@ -1332,9 +1332,13 @@
     "steve": "Steve",
     "alex": "Alex",
     "upload": "本地上传",
-    "uploadSkin": "上传新皮肤",
-    "uploadCape": "上传新披风",
-    "thinModel": "纤细皮肤"
+    "skin": "皮肤",
+    "cape": "披风",
+    "model": {
+      "label": "模型",
+      "default": "宽型",
+      "slim": "纤细"
+    }
   },
   "ManualAddJavaPathModal": {
     "modal": {
@@ -2382,6 +2386,9 @@
       "disableRotation": "禁用旋转",
       "play": "播放",
       "pause": "暂停"
+    },
+    "error": {
+      "loadSkin": "加载皮肤失败"
     }
   },
   "SpotlightSearchModal": {

@@ -1332,9 +1332,13 @@
     "steve": "Steve",
     "alex": "Alex",
     "upload": "Upload",
-    "uploadSkin": "Upload Skin",
-    "uploadCape": "Upload Cape",
-    "thinModel": "Thin Skin"
+    "skin": "Skin",
+    "cape": "Cape",
+    "model": {
+      "label": "Model",
+      "default": "Wide",
+      "slim": "Slim"
+    }
   },
   "ManualAddJavaPathModal": {
     "modal": {
@@ -2382,6 +2386,9 @@
       "disableRotation": "Disable Rotation",
       "play": "Play",
       "pause": "Pause"
+    },
+    "error": {
+      "loadSkin": "Failed to load skin"
     }
   },
   "SpotlightSearchModal": {
