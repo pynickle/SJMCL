@@ -90,7 +90,7 @@
       },
       "modpack": {
         "title": "导入整合包",
-        "description": "从本地文件或互联网导入整合包（CurseForge, Modrinth 或 HMCL 格式）"
+        "description": "从本地文件或互联网导入整合包（CurseForge, Modrinth 或 MultiMC 格式）"
       },
       "manageDirs": {
         "title": "管理游戏目录",
@@ -339,6 +339,15 @@
       "renameOldMod": "重命名旧文件失败"
     }
   },
+  "ChangeModLoaderModal": {
+    "header": {
+      "title": "修改模组加载器"
+    },
+    "notSelectedLoader": "未选择新的加载器",
+    "footer": {
+      "installFabricApi": "同时安装 Fabric API 模组"
+    }
+  },
   "ClearDownloadCacheAlertDialog": {
     "dialog": {
       "title": "清除下载缓存",
@@ -572,6 +581,7 @@
     "task": {
       "game-client": "游戏客户端 {{param}}",
       "game-server": "游戏服务端 {{param}}",
+      "change-mod-loader": "修改模组加载器 {{param}}",
       "mod": "模组",
       "world": "存档",
       "resourcepack": "资源包",
@@ -606,9 +616,6 @@
     "placeholder": {
       "dirName": "请输入名称",
       "dirPath": "请选择游戏目录"
-    },
-    "button": {
-      "browse": "浏览"
     },
     "dialog": {
       "browse": {
@@ -850,6 +857,7 @@
         "description": "请先登录微软账户后使用此功能。"
       }
     },
+    "browse": "浏览",
     "cancel": "取消",
     "close": "关闭",
     "confirm": "确定",
@@ -1334,8 +1342,16 @@
     "steve": "Steve",
     "alex": "Alex"
   },
-  "ViewSkinModal": {
-    "skinView": "查看皮肤"
+  "ManualAddJavaPathModal": {
+    "modal": {
+      "header": "添加 Java"
+    },
+    "label": {
+      "javaPath": "Java 路径"
+    },
+    "placeholder": {
+      "javaPath": "请输入或选择 Java 可执行文件路径"
+    }
   },
   "MemoryStatusProgress": {
     "title": "内存状态",
@@ -2303,6 +2319,22 @@
           }
         }
       },
+      "checkChangeModLoaderAvailablity": {
+        "error": {
+          "title": "无法更改模组加载器",
+          "description": {
+            "NOT_SUPPORT_CHANGE_MOD_LOADER": "由外部安装的版本，无法卸载或更换"
+          }
+        }
+      },
+      "changeModLoader": {
+        "error": {
+          "title": "修改模组加载器失败",
+          "description": {
+            "NOT_SUPPORT_CHANGE_MOD_LOADER": "由外部安装的版本，无法卸载或更换"
+          }
+        }
+      },
       "retrieveModpackMetaInfo": {
         "error": {
           "title": "获取整合包资源信息失败",
@@ -2459,6 +2491,9 @@
         "javaEdition": "Java版{{version}}"
       }
     }
+  },
+  "ViewSkinModal": {
+    "skinView": "查看皮肤"
   },
   "WelcomeAndTermsModal": {
     "header": {

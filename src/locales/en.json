@@ -90,7 +90,7 @@
       },
       "modpack": {
         "title": "Import Modpack",
-        "description": "Import a modpack (CurseForge, Modrinth or HMCL formats) from local files or the internet"
+        "description": "Import a modpack (CurseForge, Modrinth or MultiMC formats) from local files or the internet"
       },
       "manageDirs": {
         "title": "Manage Game Directories",
@@ -315,6 +315,15 @@
           "title": "Enhance Contrast"
         }
       }
+    }
+  },
+  "ChangeModLoaderModal": {
+    "header": {
+      "title": "Change Mod Loader"
+    },
+    "notSelectedLoader": "No new loader selected",
+    "footer": {
+      "installFabricApi": "Install Fabric API Mod"
     }
   },
   "CheckModUpdateModal": {
@@ -572,6 +581,7 @@
     "task": {
       "game-client": "Game Client {{param}}",
       "game-server": "Game Server {{param}}",
+      "change-mod-loader": "Change Mod Loader {{param}}",
       "mod": "Mod",
       "world": "World",
       "resourcepack": "Resourcepack",
@@ -606,9 +616,6 @@
     "placeholder": {
       "dirName": "Directory Name",
       "dirPath": "Select a game directory"
-    },
-    "button": {
-      "browse": "Browse"
     },
     "dialog": {
       "browse": {
@@ -850,6 +857,7 @@
         "description": "Please log in with your Microsoft account before accessing this feature."
       }
     },
+    "browse": "Browse",
     "cancel": "Cancel",
     "close": "Close",
     "confirm": "OK",
@@ -1334,8 +1342,16 @@
     "steve": "Steve",
     "alex": "Alex"
   },
-  "ViewSkinModal": {
-    "skinView": "View Skin"
+  "ManualAddJavaPathModal": {
+    "modal": {
+      "header": "Add Java"
+    },
+    "label": {
+      "javaPath": "Java Path"
+    },
+    "placeholder": {
+      "javaPath": "Please enter or select the Java executable file path"
+    }
   },
   "MemoryStatusProgress": {
     "title": "Memory Status",
@@ -2303,6 +2319,22 @@
           }
         }
       },
+      "checkChangeModLoaderAvailablity": {
+        "error": {
+          "title": "Unable to Change Mod Loader",
+          "description": {
+            "NOT_SUPPORT_CHANGE_MOD_LOADER": "Installed by external process, which cannot be configured"
+          }
+        }
+      },
+      "changeModLoader": {
+        "error": {
+          "title": "Failed to Change Mod Loader",
+          "description": {
+            "NOT_SUPPORT_CHANGE_MOD_LOADER": "Installed by external process, which cannot be configured"
+          }
+        }
+      },
       "retrieveModpackMetaInfo": {
         "error": {
           "title": "Failed to retrieve modpack resource info",
@@ -2459,6 +2491,9 @@
         "javaEdition": "Java_Edition_{{version}}"
       }
     }
+  },
+  "ViewSkinModal": {
+    "skinView": "View Skin"
   },
   "WelcomeAndTermsModal": {
     "header": {
