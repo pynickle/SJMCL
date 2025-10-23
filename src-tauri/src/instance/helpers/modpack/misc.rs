@@ -9,6 +9,8 @@ use serde::{Deserialize, Serialize};
 use std::fs::File;
 use std::path::{Path, PathBuf};
 use std::{fs, process};
+use tauri::path::BaseDirectory;
+use tauri::{AppHandle, Manager};
 
 #[derive(Deserialize, Serialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
@@ -79,6 +81,7 @@ impl ModpackMetaInfo {
 }
 
 pub fn extract_overrides(
+  app: &AppHandle,
   overrides_path: &String,
   file: File,
   instance_path: &Path,
@@ -87,7 +90,9 @@ pub fn extract_overrides(
 
   let pid = process::id();
   let temp_name = format!("ripunzip_overrides_{}", pid);
-  let temp_path: PathBuf = std::env::temp_dir().join(temp_name);
+  let temp_path: PathBuf = app
+    .path()
+    .resolve::<PathBuf>(PathBuf::from(&temp_name), BaseDirectory::Temp)?;
   fs::create_dir_all(&temp_path)?;
 
   let options = UnzipOptions {
