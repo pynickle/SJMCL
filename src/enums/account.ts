@@ -10,8 +10,8 @@ export enum PresetRole {
 }
 
 export enum SkinModel {
-  Default = "DEFAULT",
-  Slim = "SLIM",
+  Default = "default",
+  Slim = "slim",
 }
 
 export enum TextureType {

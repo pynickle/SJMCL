@@ -38,15 +38,29 @@ pub enum TextureType {
   Cape,
 }
 
-#[derive(
-  Debug, PartialEq, Eq, Clone, Serialize, Deserialize, Display, Default, EnumIter, EnumString,
-)]
-#[serde(rename_all = "UPPERCASE")]
-#[strum(serialize_all = "UPPERCASE")]
+#[derive(Debug, PartialEq, Eq, Clone, Serialize, Display, Default, EnumIter, EnumString)]
+#[serde(rename_all = "lowercase")]
+#[strum(serialize_all = "lowercase")]
 pub enum SkinModel {
   #[default]
   Default,
   Slim,
+}
+
+// legacy version of SJMCL storage skin model in both upper and lower cases, need to be converted to the new format
+// will be removed in the future
+impl<'de> Deserialize<'de> for SkinModel {
+  fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+  where
+    D: serde::Deserializer<'de>,
+  {
+    let s = String::deserialize(deserializer)?;
+    match s.to_lowercase().as_str() {
+      "default" => Ok(SkinModel::Default),
+      "slim" => Ok(SkinModel::Slim),
+      _ => Err(serde::de::Error::unknown_variant(&s, &["default", "slim"])),
+    }
+  }
 }
 
 #[derive(Debug, PartialEq, Eq, Clone, Deserialize, Serialize, Default)]
