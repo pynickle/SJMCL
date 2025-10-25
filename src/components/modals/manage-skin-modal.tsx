@@ -1,6 +1,6 @@
 import {
+  Box,
   Button,
-  Flex,
   FormControl,
   FormLabel,
   Grid,
@@ -22,9 +22,11 @@ import {
 } from "@chakra-ui/react";
 import { convertFileSrc } from "@tauri-apps/api/core";
 import { open } from "@tauri-apps/plugin-dialog";
+import { error } from "@tauri-apps/plugin-log";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { LuFolderOpen } from "react-icons/lu";
+import { AutoSizer } from "react-virtualized";
 import SegmentedControl from "@/components/common/segmented";
 import SkinPreview from "@/components/skin-preview";
 import { useLauncherConfig } from "@/contexts/config";
@@ -70,7 +72,9 @@ const ManageSkinModal: React.FC<ManageSkinModalProps> = ({
     steve: { src: "/images/skins/steve.png", model: SkinModel.Default },
     alex: { src: "/images/skins/alex.png", model: SkinModel.Slim },
     upload: {
-      src: uploadSkinFilePath ? convertFileSrc(uploadSkinFilePath) : "",
+      src: uploadSkinFilePath
+        ? convertFileSrc(uploadSkinFilePath)
+        : "/images/skins/dummy.png",
       model: skinModel,
     },
   };
@@ -153,8 +157,9 @@ const ManageSkinModal: React.FC<ManageSkinModalProps> = ({
             status: "error",
           });
         }
-      } catch (e) {
-        console.error(e);
+      } catch (e: any) {
+        console.log(e);
+        error(e.message);
       } finally {
         setIsLoading(false);
         getPlayerList(true);
@@ -210,22 +215,26 @@ const ManageSkinModal: React.FC<ManageSkinModalProps> = ({
         <ModalCloseButton />
         <ModalBody width="100%">
           <Grid templateColumns="3fr 2fr" gap={4} h="320px" width="100%">
-            <Flex justify="center" align="center" height="100%">
-              <SkinPreview
-                skinSrc={skinOptions[selectedSkin].src}
-                skinModel={skinOptions[selectedSkin].model}
-                capeSrc={
-                  selectedSkin === "default" && cape
-                    ? base64ImgSrc(cape.image)
-                    : selectedSkin === "upload" && uploadCapeFilePath
-                      ? convertFileSrc(uploadCapeFilePath)
-                      : undefined
-                }
-                width={270}
-                height={310}
-                showControlBar
-              />
-            </Flex>
+            <Box width="100%" height="100%">
+              <AutoSizer>
+                {({ height, width }) => (
+                  <SkinPreview
+                    skinSrc={skinOptions[selectedSkin].src}
+                    skinModel={skinOptions[selectedSkin].model}
+                    capeSrc={
+                      selectedSkin === "default" && cape
+                        ? base64ImgSrc(cape.image)
+                        : selectedSkin === "upload" && uploadCapeFilePath
+                          ? convertFileSrc(uploadCapeFilePath)
+                          : undefined
+                    }
+                    width={width}
+                    height={height}
+                    showControlBar
+                  />
+                )}
+              </AutoSizer>
+            </Box>
 
             <VStack spacing={2} alignItems="flex-start" minWidth="100%">
               <RadioGroup

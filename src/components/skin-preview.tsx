@@ -1,5 +1,4 @@
 import {
-  Box,
   BoxProps,
   Flex,
   HStack,
@@ -14,6 +13,7 @@ import {
   Tooltip,
   VStack,
 } from "@chakra-ui/react";
+import { error as logError } from "@tauri-apps/plugin-log";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { BsPersonRaisedHand } from "react-icons/bs";
@@ -147,11 +147,12 @@ const SkinPreview: React.FC<SkinPreviewProps> = ({
         }
       } catch (error) {
         initSkinViewer(); // reset viewer on error
-        setErrorMessage(
+        let errorMsg =
           error instanceof Error
             ? error.message
-            : t("SkinPreview.error.loadSkin")
-        );
+            : t("SkinPreview.error.loadSkin");
+        setErrorMessage(errorMsg);
+        logError(errorMsg);
       }
     })();
   }, [
@@ -259,7 +260,7 @@ const SkinPreview: React.FC<SkinPreviewProps> = ({
   }, [background, backgroundList]);
 
   return (
-    <Box {...props}>
+    <VStack {...props} width={width} height={height}>
       {errorMessage && (
         <VStack
           width={width}
@@ -276,7 +277,12 @@ const SkinPreview: React.FC<SkinPreviewProps> = ({
         style={{ display: errorMessage ? "none" : undefined }}
       />
       {showControlBar && (
-        <Flex alignItems="center" justifyContent="space-between" mt={2}>
+        <Flex
+          alignItems="center"
+          justifyContent="space-between"
+          mt={2}
+          width="100%"
+        >
           <HStack spacing={0}>
             <BackGroundSelector />
             <Tooltip label={t(`SkinPreview.animation.${currentAnimation}`)}>
@@ -329,7 +335,7 @@ const SkinPreview: React.FC<SkinPreviewProps> = ({
           </HStack>
         </Flex>
       )}
-    </Box>
+    </VStack>
   );
 };
 
