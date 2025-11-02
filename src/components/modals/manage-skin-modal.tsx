@@ -58,6 +58,8 @@ const ManageSkinModal: React.FC<ManageSkinModalProps> = ({
   const [uploadCapeFilePath, setUploadCapeFilePath] = useState<string>("");
   const [skinModel, setSkinModel] = useState<SkinModel>(SkinModel.Default);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isCapeVisible, setIsCapeVisible] = useState<boolean>(true);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const { t } = useTranslation();
   const { config } = useLauncherConfig();
   const { getPlayerList } = useGlobalData();
@@ -130,7 +132,7 @@ const ManageSkinModal: React.FC<ManageSkinModalProps> = ({
           skinModel
         );
         if (skinResp.status === "success") {
-          if (uploadCapeFilePath) {
+          if (isCapeVisible && uploadCapeFilePath) {
             const capeResp = await AccountService.updatePlayerSkinOfflineLocal(
               playerId,
               uploadCapeFilePath,
@@ -231,6 +233,10 @@ const ManageSkinModal: React.FC<ManageSkinModalProps> = ({
                     width={width}
                     height={height}
                     showControlBar
+                    isCapeVisible={isCapeVisible}
+                    setIsCapeVisible={setIsCapeVisible}
+                    errorMessage={errorMessage}
+                    setErrorMessage={setErrorMessage}
                   />
                 )}
               </AutoSizer>
@@ -304,6 +310,7 @@ const ManageSkinModal: React.FC<ManageSkinModalProps> = ({
                         onChange={(e) => setUploadCapeFilePath(e.target.value)}
                         flex={1}
                         variant="filled"
+                        disabled={!isCapeVisible}
                       />
                       <IconButton
                         onClick={handleUploadCapeFile}
@@ -311,6 +318,7 @@ const ManageSkinModal: React.FC<ManageSkinModalProps> = ({
                         width="100%"
                         aria-label={t("ManageSkinModal.upload")}
                         flex={0}
+                        disabled={!isCapeVisible}
                       >
                         <LuFolderOpen />
                       </IconButton>
@@ -332,6 +340,7 @@ const ManageSkinModal: React.FC<ManageSkinModalProps> = ({
             onClick={handleSave}
             isLoading={isLoading}
             disabled={
+              errorMessage !== null ||
               selectedSkin === "default" ||
               (selectedSkin === "upload" && !uploadSkinFilePath) ||
               skin?.preset === selectedSkin

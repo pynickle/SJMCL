@@ -46,7 +46,10 @@ interface SkinPreviewProps extends Omit<BoxProps, "width" | "height"> {
   height?: number;
   animation?: AnimationType;
   canvasBg?: backgroundType;
-  showCape?: boolean;
+  isCapeVisible?: boolean;
+  setIsCapeVisible?: (show: boolean) => void;
+  errorMessage?: string | null;
+  setErrorMessage?: (msg: string | null) => void;
   showControlBar?: boolean;
   skinModel?: SkinModel;
 }
@@ -58,7 +61,10 @@ const SkinPreview: React.FC<SkinPreviewProps> = ({
   height = 400,
   animation = "walk",
   canvasBg = "none",
-  showCape = true,
+  isCapeVisible = true,
+  setIsCapeVisible,
+  errorMessage,
+  setErrorMessage,
   showControlBar = true,
   skinModel,
   ...props
@@ -73,8 +79,6 @@ const SkinPreview: React.FC<SkinPreviewProps> = ({
   const [background, setBackground] = useState<backgroundType>(canvasBg);
   const [autoRotate, setAutoRotate] = useState(false);
   const [isPlaying, setIsPlaying] = useState(true);
-  const [isCapeVisible, setIsCapeVisible] = useState(showCape);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   // animation
   const animationList = useMemo(
@@ -124,8 +128,8 @@ const SkinPreview: React.FC<SkinPreviewProps> = ({
   }, [initSkinViewer]);
 
   useEffect(() => {
-    setIsCapeVisible(showCape);
-  }, [showCape]);
+    setIsCapeVisible?.(isCapeVisible);
+  }, [setIsCapeVisible, isCapeVisible]);
 
   useEffect(() => {
     (async () => {
@@ -143,7 +147,7 @@ const SkinPreview: React.FC<SkinPreviewProps> = ({
           } else {
             skinViewerRef.current.resetCape();
           }
-          setErrorMessage(null);
+          setErrorMessage?.(null);
         }
       } catch (error) {
         initSkinViewer(); // reset viewer on error
@@ -151,7 +155,7 @@ const SkinPreview: React.FC<SkinPreviewProps> = ({
           error instanceof Error
             ? error.message
             : t("SkinPreview.error.loadSkin");
-        setErrorMessage(errorMsg);
+        setErrorMessage?.(errorMsg);
         logError(errorMsg);
       }
     })();
@@ -163,6 +167,7 @@ const SkinPreview: React.FC<SkinPreviewProps> = ({
     t,
     initSkinViewer,
     skinModel,
+    setErrorMessage,
   ]);
 
   // background
@@ -329,7 +334,7 @@ const SkinPreview: React.FC<SkinPreviewProps> = ({
             <Text fontSize="sm">{t("SkinPreview.cape")}</Text>
             <Switch
               isChecked={isCapeVisible}
-              onChange={(e) => setIsCapeVisible(e.target.checked)}
+              onChange={(e) => setIsCapeVisible?.(e.target.checked)}
               colorScheme={primaryColor}
             />
           </HStack>
@@ -338,5 +343,5 @@ const SkinPreview: React.FC<SkinPreviewProps> = ({
     </VStack>
   );
 };
-
+7;
 export default SkinPreview;
