@@ -13,7 +13,6 @@ import {
   Tooltip,
   VStack,
 } from "@chakra-ui/react";
-import { error as logError } from "@tauri-apps/plugin-log";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { BsPersonRaisedHand } from "react-icons/bs";
@@ -47,9 +46,9 @@ interface SkinPreviewProps extends Omit<BoxProps, "width" | "height"> {
   animation?: AnimationType;
   canvasBg?: backgroundType;
   isCapeVisible?: boolean;
-  setIsCapeVisible?: (show: boolean) => void;
+  onCapeVisibilityChange?: (show: boolean) => void;
   errorMessage?: string | null;
-  setErrorMessage?: (msg: string | null) => void;
+  onSkinError?: (msg: string | null) => void;
   showControlBar?: boolean;
   skinModel?: SkinModel;
 }
@@ -62,9 +61,9 @@ const SkinPreview: React.FC<SkinPreviewProps> = ({
   animation = "walk",
   canvasBg = "none",
   isCapeVisible = true,
-  setIsCapeVisible,
+  onCapeVisibilityChange,
   errorMessage,
-  setErrorMessage,
+  onSkinError,
   showControlBar = true,
   skinModel,
   ...props
@@ -128,8 +127,8 @@ const SkinPreview: React.FC<SkinPreviewProps> = ({
   }, [initSkinViewer]);
 
   useEffect(() => {
-    setIsCapeVisible?.(isCapeVisible);
-  }, [setIsCapeVisible, isCapeVisible]);
+    onCapeVisibilityChange?.(isCapeVisible);
+  }, [onCapeVisibilityChange, isCapeVisible]);
 
   useEffect(() => {
     (async () => {
@@ -147,7 +146,7 @@ const SkinPreview: React.FC<SkinPreviewProps> = ({
           } else {
             skinViewerRef.current.resetCape();
           }
-          setErrorMessage?.(null);
+          onSkinError?.(null);
         }
       } catch (error) {
         initSkinViewer(); // reset viewer on error
@@ -155,8 +154,8 @@ const SkinPreview: React.FC<SkinPreviewProps> = ({
           error instanceof Error
             ? error.message
             : t("SkinPreview.error.loadSkin");
-        setErrorMessage?.(errorMsg);
-        logError(errorMsg);
+        onSkinError?.(errorMsg);
+        logger.error(`SkinPreview error: ${errorMsg}`);
       }
     })();
   }, [
@@ -167,7 +166,7 @@ const SkinPreview: React.FC<SkinPreviewProps> = ({
     t,
     initSkinViewer,
     skinModel,
-    setErrorMessage,
+    onSkinError,
   ]);
 
   // background
@@ -334,7 +333,7 @@ const SkinPreview: React.FC<SkinPreviewProps> = ({
             <Text fontSize="sm">{t("SkinPreview.cape")}</Text>
             <Switch
               isChecked={isCapeVisible}
-              onChange={(e) => setIsCapeVisible?.(e.target.checked)}
+              onChange={(e) => onCapeVisibilityChange?.(e.target.checked)}
               colorScheme={primaryColor}
             />
           </HStack>
@@ -343,5 +342,5 @@ const SkinPreview: React.FC<SkinPreviewProps> = ({
     </VStack>
   );
 };
-7;
+
 export default SkinPreview;

@@ -11,6 +11,7 @@ use crate::account::models::{
 use crate::error::SJMCLResult;
 use crate::launcher_config::models::LauncherConfig;
 use crate::storage::Storage;
+use crate::utils::fs::get_app_resource_filepath;
 use std::path::Path;
 use std::sync::Mutex;
 use tauri::{AppHandle, Manager};
@@ -388,9 +389,15 @@ pub fn update_player_skin_offline_local(
   texture_type: TextureType,
   skin_model: SkinModel,
 ) -> SJMCLResult<()> {
-  let image_path = Path::new(&image_path);
+  let image_path = if image_path == "dummy" {
+    // this is an Easter Egg :)
+    get_app_resource_filepath(&app, "assets/skins/dummy.png")
+      .map_err(|_| AccountError::TextureError)?
+  } else {
+    Path::new(&image_path).to_path_buf()
+  };
   let texture_img =
-    crate::utils::image::load_image_from_dir(image_path).ok_or(AccountError::TextureError)?;
+    crate::utils::image::load_image_from_dir(&image_path).ok_or(AccountError::TextureError)?;
 
   let account_binding = app.state::<Mutex<AccountInfo>>();
   let mut account_state = account_binding.lock()?;

@@ -1348,7 +1348,7 @@
       "javaPath": "Java 路径"
     },
     "placeholder": {
-      "javaPath": "请输入或选择 Java 可执行文件路径"  
+      "javaPath": "请输入或选择 Java 可执行文件路径"
     }
   },
   "MemoryStatusProgress": {
@@ -1946,7 +1946,8 @@
           "title": "角色皮肤更新失败",
           "description": {
             "NOT_FOUND": "角色不存在",
-            "INVALID": "角色类型错误"
+            "INVALID": "角色类型错误",
+            "TEXTURE_ERROR": "角色皮肤获取失败"
           }
         }
       },
@@ -2039,7 +2040,7 @@
             "EXPIRED": "访问令牌已过期，请重新登录",
             "NETWORK_ERROR": "无法连接到服务器",
             "PARSE_ERROR": "服务器返回的数据格式错误",
-            "NO_DOWNLOAD_API": "下载 Authlib-Injector 失败，请检查网络连接",
+            "AUTHLIB_INJECTOR_NOT_READY": "下载 Authlib-Injector 失败，请检查网络连接",
             "SAVE_ERROR": "保存 Authlib-Injector 失败",
             "LAUNCHING_STATE_NOT_FOUND": "启动状态丢失"
           }
@@ -2049,7 +2050,8 @@
         "error": {
           "title": "启动游戏失败",
           "description": {
-            "LAUNCHING_STATE_NOT_FOUND": "启动状态丢失"
+            "LAUNCHING_STATE_NOT_FOUND": "启动状态丢失",
+            "AUTH_SERVER_NOT_FOUND": "认证服务器不存在"
           }
         }
       }

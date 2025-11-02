@@ -44,7 +44,7 @@ const ViewSkinModal: React.FC<ViewSkinModalProps> = ({
               height={310}
               showControlBar
               isCapeVisible={isCapeVisible}
-              setIsCapeVisible={setIsCapeVisible}
+              onCapeVisibilityChange={setIsCapeVisible}
             />
           </Flex>
         </ModalBody>

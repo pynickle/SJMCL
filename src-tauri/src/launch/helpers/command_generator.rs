@@ -1,7 +1,4 @@
-use crate::account::helpers::authlib_injector::jar::{
-  check_authlib_jar, get_jar_path as get_authlib_injector_jar_path,
-};
-use crate::account::helpers::offline::yggdrasil_server::YggdrasilServer;
+use crate::account::helpers::authlib_injector::jar::get_jar_path as get_authlib_injector_jar_path;
 use crate::account::models::{AccountError, PlayerType};
 use crate::error::{SJMCLError, SJMCLResult};
 use crate::instance::helpers::client_json::FeaturesInfo;
@@ -102,7 +99,6 @@ pub async fn generate_launch_command(
 ) -> SJMCLResult<LaunchCommand> {
   let launcher_config = { app.state::<Mutex<LauncherConfig>>().lock()?.clone() };
   let launching_queue = { app.state::<Mutex<Vec<LaunchingState>>>().lock()?.clone() };
-  let local_ygg_server = { app.state::<Mutex<YggdrasilServer>>().lock()?.clone() };
 
   let LauncherConfig { basic_info, .. } = launcher_config;
   let launching = launching_queue
@@ -271,12 +267,11 @@ pub async fn generate_launch_command(
   // TODO: lwjgl non-ASCII path fix (HMCL DefaultLauncher.java#L236)
 
   // login via authlib-injector
-  if selected_player.player_type == PlayerType::ThirdParty {
-    // third-party login via skin server
-    check_authlib_jar(app)
-      .await
-      .map_err(|_| LaunchError::AuthlibInjectorNotReady)?;
-
+  if matches!(
+    selected_player.player_type,
+    PlayerType::ThirdParty | PlayerType::Offline
+  ) && auth_server_meta.is_some()
+  {
     let auth_server_url = selected_player
       .auth_server_url
       .clone()
@@ -289,22 +284,7 @@ pub async fn generate_launch_command(
     cmd.push("-Dauthlibinjector.side=client".to_string());
     cmd.push(format!(
       "-Dauthlibinjector.yggdrasil.prefetched={}",
-      general_purpose::STANDARD.encode(&auth_server_meta)
-    ));
-  } else if selected_player.player_type == PlayerType::Offline
-    && (check_authlib_jar(app).await).is_ok()
-  {
-    // offline login via local yggdrasil server
-    let local_server_url = local_ygg_server.root_url;
-    cmd.push(format!(
-      "-javaagent:{}={}",
-      get_authlib_injector_jar_path(app)?.to_string_lossy(),
-      local_server_url
-    ));
-    cmd.push("-Dauthlibinjector.side=client".to_string());
-    cmd.push(format!(
-      "-Dauthlibinjector.yggdrasil.prefetched={}",
-      general_purpose::STANDARD.encode(&auth_server_meta)
+      general_purpose::STANDARD.encode(auth_server_meta.unwrap())
     ));
   }
 

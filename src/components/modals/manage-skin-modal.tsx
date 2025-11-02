@@ -74,9 +74,10 @@ const ManageSkinModal: React.FC<ManageSkinModalProps> = ({
     steve: { src: "/images/skins/steve.png", model: SkinModel.Default },
     alex: { src: "/images/skins/alex.png", model: SkinModel.Slim },
     upload: {
-      src: uploadSkinFilePath
-        ? convertFileSrc(uploadSkinFilePath)
-        : "/images/skins/dummy.png",
+      src:
+        uploadSkinFilePath && uploadSkinFilePath !== "dummy"
+          ? convertFileSrc(uploadSkinFilePath)
+          : "/images/skins/dummy.png",
       model: skinModel,
     },
   };
@@ -86,13 +87,19 @@ const ManageSkinModal: React.FC<ManageSkinModalProps> = ({
   }, [skin]);
 
   useEffect(() => {
-    if (!isOpen && selectedSkin === "upload") {
+    if (!isOpen) {
       setSelectedSkin(skin?.preset || "default");
-      setUploadSkinFilePath("");
-      setUploadCapeFilePath("");
       setSkinModel(SkinModel.Default);
     }
-  }, [isOpen, selectedSkin, skin?.preset]);
+  }, [isOpen, skin?.preset]);
+
+  useEffect(() => {
+    if (selectedSkin === "upload") {
+      setUploadSkinFilePath("");
+      setSkinModel(SkinModel.Default);
+      setUploadCapeFilePath("");
+    }
+  }, [selectedSkin]);
 
   const handleSave = async () => {
     if (selectedSkin === "default") {
@@ -234,9 +241,9 @@ const ManageSkinModal: React.FC<ManageSkinModalProps> = ({
                     height={height}
                     showControlBar
                     isCapeVisible={isCapeVisible}
-                    setIsCapeVisible={setIsCapeVisible}
+                    onCapeVisibilityChange={setIsCapeVisible}
                     errorMessage={errorMessage}
-                    setErrorMessage={setErrorMessage}
+                    onSkinError={setErrorMessage}
                   />
                 )}
               </AutoSizer>
