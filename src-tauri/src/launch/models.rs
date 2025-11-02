@@ -17,6 +17,8 @@ pub enum LaunchError {
   ChangeWindowTitleFailed,
   KillProcessFailed,
   LaunchingStateNotFound,
+  AuthlibInjectorNotReady,
+  AuthServerNotFound,
 }
 
 impl std::error::Error for LaunchError {}

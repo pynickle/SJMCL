@@ -1,4 +1,6 @@
-use crate::account::helpers::authlib_injector::jar::get_jar_path as get_authlib_injector_jar_path;
+use crate::account::helpers::authlib_injector::jar::{
+  check_authlib_jar, get_jar_path as get_authlib_injector_jar_path,
+};
 use crate::account::helpers::offline::yggdrasil_server::YggdrasilServer;
 use crate::account::models::{AccountError, PlayerType};
 use crate::error::{SJMCLError, SJMCLResult};
@@ -268,17 +270,36 @@ pub async fn generate_launch_command(
 
   // TODO: lwjgl non-ASCII path fix (HMCL DefaultLauncher.java#L236)
 
-  // authlib-injector login
-  if selected_player.player_type == PlayerType::ThirdParty
-    || selected_player.player_type == PlayerType::Offline
-  {
+  // login via authlib-injector
+  if selected_player.player_type == PlayerType::ThirdParty {
+    // third-party login via skin server
+    check_authlib_jar(app)
+      .await
+      .map_err(|_| LaunchError::AuthlibInjectorNotReady)?;
+
+    let auth_server_url = selected_player
+      .auth_server_url
+      .clone()
+      .ok_or(LaunchError::AuthServerNotFound)?;
     cmd.push(format!(
       "-javaagent:{}={}",
       get_authlib_injector_jar_path(app)?.to_string_lossy(),
-      selected_player
-        .auth_server_url
-        .clone()
-        .unwrap_or(local_ygg_server.root_url.clone())
+      auth_server_url
+    ));
+    cmd.push("-Dauthlibinjector.side=client".to_string());
+    cmd.push(format!(
+      "-Dauthlibinjector.yggdrasil.prefetched={}",
+      general_purpose::STANDARD.encode(&auth_server_meta)
+    ));
+  } else if selected_player.player_type == PlayerType::Offline
+    && (check_authlib_jar(app).await).is_ok()
+  {
+    // offline login via local yggdrasil server
+    let local_server_url = local_ygg_server.root_url;
+    cmd.push(format!(
+      "-javaagent:{}={}",
+      get_authlib_injector_jar_path(app)?.to_string_lossy(),
+      local_server_url
     ));
     cmd.push("-Dauthlibinjector.side=client".to_string());
     cmd.push(format!(
@@ -402,7 +423,7 @@ pub fn export_full_launch_command(
   args: &[String],
   java_exec_str: &str,
 ) -> String {
-  fn quote_or_raw(s: &str) -> Cow<str> {
+  fn quote_or_raw(s: &'_ str) -> Cow<'_, str> {
     try_quote(s).unwrap_or(Cow::Borrowed(s))
   }
 
