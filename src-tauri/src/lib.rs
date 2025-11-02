@@ -11,6 +11,7 @@ mod tasks;
 mod utils;
 
 use account::helpers::authlib_injector::info::refresh_and_update_auth_servers;
+use account::helpers::offline::yggdrasil_server::YggdrasilServer;
 use account::models::AccountInfo;
 use instance::helpers::misc::refresh_and_update_instances;
 use instance::models::misc::Instance;
@@ -88,6 +89,7 @@ pub async fn run() {
       account::commands::relogin_player_3rdparty_password,
       account::commands::add_player_from_selection,
       account::commands::update_player_skin_offline_preset,
+      account::commands::update_player_skin_offline_local,
       account::commands::delete_player,
       account::commands::refresh_player,
       account::commands::retrieve_auth_server_list,
@@ -197,6 +199,13 @@ pub async fn run() {
 
       let launching_queue = Vec::<LaunchingState>::new();
       app.manage(Mutex::new(launching_queue));
+
+      // start local yggdrasil server for offline accounts
+      let local_ygg_server = YggdrasilServer::new();
+      app.manage(Mutex::new(local_ygg_server.clone()));
+      tauri::async_runtime::spawn(async move {
+        local_ygg_server.run().await.unwrap_or_default();
+      });
 
       // check if full account feature (offline and 3rd-party login) is available
       let app_handle = app.handle().clone();
