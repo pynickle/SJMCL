@@ -162,17 +162,12 @@ impl YggdrasilServer {
       .route("/", get(handle_root))
       .route("/status", get(handle_status))
       .route("/api/profiles/minecraft", post(handle_profiles))
-      .route(
-        "/sessionserver/session/minecraft/hasJoined",
-        get(handle_has_joined),
-      )
-      .route(
-        "/sessionserver/session/minecraft/join",
-        post(handle_join_server),
-      )
-      .route(
-        "/sessionserver/session/minecraft/profile/{uuid}",
-        get(handle_profile_route),
+      .nest(
+        "/sessionserver/session/minecraft",
+        Router::new()
+          .route("/hasJoined", get(handle_has_joined))
+          .route("/join", post(handle_join_server))
+          .route("/profile/{uuid}", get(handle_profile_route)),
       )
       .route("/textures/{hash}", get(handle_texture_route))
       .layer(CorsLayer::permissive())
@@ -234,7 +229,7 @@ async fn handle_status(State(state): State<YggdrasilServer>) -> Json<Value> {
   let players = state.players.lock().unwrap();
 
   log::info!(
-    "Local Yggdrasil server received: GET /status - Status endpoint (chars: {})",
+    "Local Yggdrasil server received: GET /status - Status endpoint (players: {})",
     players.len()
   );
 
@@ -283,7 +278,7 @@ async fn handle_has_joined(
         )
           .into_response()
       } else {
-        log::warn!("Character not found: {}", username);
+        log::warn!("Player not found: {}", username);
         StatusCode::NO_CONTENT.into_response()
       }
     }
