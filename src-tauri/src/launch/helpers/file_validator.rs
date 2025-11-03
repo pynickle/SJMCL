@@ -23,6 +23,88 @@ use zip::ZipArchive;
 
 const CONCURRENT_HASH_CHECKS: usize = 16;
 
+#[derive(Debug, Hash, Eq, PartialEq)]
+struct LibraryKey {
+  path: String,
+  pack_name: String,
+  classifier: Option<String>,
+  extension: String,
+}
+
+pub struct LibraryParts {
+  pub path: String,
+  pub pack_name: String,
+  pub pack_version: String,
+  pub classifier: Option<String>,
+  pub extension: String,
+}
+
+fn parse_sem_version(version: &str) -> Version {
+  Version::parse(version).unwrap_or_else(|_| {
+    let mut parts = version.split('.').collect::<Vec<_>>();
+    while parts.len() < 3 {
+      parts.push("0");
+    }
+    Version::parse(&parts[..3].join(".")).unwrap_or_else(|_| Version::new(0, 1, 0))
+  })
+}
+
+pub fn parse_library_name(name: &str, native: Option<String>) -> SJMCLResult<LibraryParts> {
+  let parts: Vec<&str> = name.split('@').collect();
+  let file_ext = parts
+    .get(1)
+    .map(|s| s.to_string())
+    .unwrap_or_else(|| "jar".to_string());
+
+  let mut name_split: Vec<String> = parts[0].split(':').map(|s| s.to_string()).collect();
+
+  if name_split.len() < 3 {
+    return Err(InstanceError::InvalidSourcePath.into());
+  }
+
+  if let Some(native) = native {
+    name_split.push(native);
+  }
+
+  let path = name_split[0].replace('.', "/");
+  let pack_name = name_split[1].clone();
+  let pack_version = name_split[2].clone();
+  let classifier = name_split.get(3).cloned();
+
+  Ok(LibraryParts {
+    path,
+    pack_name,
+    pack_version,
+    classifier,
+    extension: file_ext,
+  })
+}
+
+pub fn convert_library_name_to_path(name: &str, native: Option<String>) -> SJMCLResult<String> {
+  let LibraryParts {
+    path,
+    pack_name,
+    pack_version,
+    classifier,
+    extension: file_ext,
+  } = parse_library_name(name, native)?;
+
+  let file_name = [
+    pack_name.clone(),
+    pack_version.clone(),
+    classifier.unwrap_or_default(),
+  ]
+  .iter()
+  .filter(|s| !s.is_empty())
+  .map(|s| s.as_str())
+  .collect::<Vec<&str>>()
+  .join("-")
+    + "."
+    + &file_ext;
+
+  Ok(format!("{path}/{pack_name}/{pack_version}/{file_name}"))
+}
+
 async fn validate_file_with_hash(
   file_path: PathBuf,
   expected_hash: String,
@@ -124,6 +206,84 @@ pub fn get_native_library_artifacts(client_info: &McClientInfo) -> Vec<Downloads
   artifacts.into_iter().collect()
 }
 
+pub fn get_nonnative_library_paths(
+  client_info: &McClientInfo,
+  library_path: &Path,
+) -> SJMCLResult<Vec<PathBuf>> {
+  let mut libraries = Vec::new();
+  let feature = FeaturesInfo::default();
+
+  for library in &client_info.libraries {
+    if library.is_allowed(&feature).unwrap_or(false) && library.natives.is_none() {
+      libraries.push(library.clone());
+    }
+  }
+
+  libraries = merge_library_lists(&libraries, &[]);
+
+  libraries
+    .iter()
+    .map(|lib| Ok(library_path.join(convert_library_name_to_path(&lib.name, None)?)))
+    .collect()
+}
+
+pub fn get_native_library_paths(
+  client_info: &McClientInfo,
+  library_path: &Path,
+) -> SJMCLResult<Vec<PathBuf>> {
+  let mut result = Vec::new();
+  let feature = FeaturesInfo::default();
+  for library in &client_info.libraries {
+    if !library.is_allowed(&feature).unwrap_or(false) || library.natives.is_none() {
+      continue;
+    }
+    let native_str = if let Some(native_fn) = Some(&get_natives_string) {
+      library.natives.as_ref().and_then(native_fn)
+    } else {
+      None
+    };
+
+    let path = convert_library_name_to_path(&library.name, native_str)?;
+    result.push(library_path.join(path));
+  }
+  Ok(result)
+}
+
+// merge two vectors of libraries, remove duplicates by name, keep the one with the highest version. also remove libraries with invalid names
+pub fn merge_library_lists(
+  libraries_a: &[LibrariesValue],
+  libraries_b: &[LibrariesValue],
+) -> Vec<LibrariesValue> {
+  let mut library_map: HashMap<LibraryKey, LibrariesValue> = HashMap::new();
+
+  for library in libraries_a.iter().chain(libraries_b.iter()) {
+    if let Ok(library_parts) = parse_library_name(&library.name, None) {
+      let key = LibraryKey {
+        path: library_parts.path,
+        pack_name: library_parts.pack_name,
+        classifier: library_parts.classifier,
+        extension: library_parts.extension,
+      };
+
+      let new_version = &library_parts.pack_version;
+
+      if let Some(existing_library) = library_map.get(&key) {
+        let existing_version = parse_library_name(&existing_library.name, None)
+          .map(|parts| parts.pack_version)
+          .unwrap_or("0.1.0".to_string());
+
+        if parse_sem_version(new_version) > parse_sem_version(&existing_version) {
+          library_map.insert(key, library.clone());
+        }
+      } else {
+        library_map.insert(key, library.clone());
+      }
+    }
+  }
+
+  library_map.into_values().collect()
+}
+
 pub async fn get_invalid_library_files(
   source: SourceType,
   library_path: &Path,
@@ -171,200 +331,6 @@ pub async fn get_invalid_library_files(
   .await
 }
 
-pub async fn get_invalid_assets(
-  app: &AppHandle,
-  client_info: &McClientInfo,
-  source: SourceType,
-  asset_path: &Path,
-  check_hash: bool,
-) -> SJMCLResult<Vec<PTaskParam>> {
-  let assets_download_api = get_download_api(source, ResourceType::Assets)?;
-  let asset_index_path = asset_path.join(format!("indexes/{}.json", client_info.asset_index.id));
-  let asset_index = load_asset_index(app, &asset_index_path, &client_info.asset_index.url).await?;
-
-  let base_path = asset_path.to_path_buf();
-
-  validate_files_concurrently(
-    asset_index.objects.into_values(),
-    check_hash,
-    move |item, check_hash| {
-      let assets_download_api = assets_download_api.clone();
-      let base_path = base_path.clone();
-
-      async move {
-        let path_in_repo = format!("{}/{}", &item.hash[..2], item.hash);
-        let dest = base_path.join(format!("objects/{}", path_in_repo));
-        let download_url = assets_download_api
-          .join(&path_in_repo)
-          .map_err(crate::error::SJMCLError::from)?;
-
-        validate_file_with_hash(dest, item.hash, download_url, check_hash).await
-      }
-    },
-  )
-  .await
-}
-
-pub struct LibraryParts {
-  pub path: String,
-  pub pack_name: String,
-  pub pack_version: String,
-  pub classifier: Option<String>,
-  pub extension: String,
-}
-
-pub fn parse_library_name(name: &str, native: Option<String>) -> SJMCLResult<LibraryParts> {
-  let parts: Vec<&str> = name.split('@').collect();
-  let file_ext = parts
-    .get(1)
-    .map(|s| s.to_string())
-    .unwrap_or_else(|| "jar".to_string());
-
-  let mut name_split: Vec<String> = parts[0].split(':').map(|s| s.to_string()).collect();
-
-  if name_split.len() < 3 {
-    return Err(InstanceError::InvalidSourcePath.into());
-  }
-
-  if let Some(native) = native {
-    name_split.push(native);
-  }
-
-  let path = name_split[0].replace('.', "/");
-  let pack_name = name_split[1].clone();
-  let pack_version = name_split[2].clone();
-  let classifier = name_split.get(3).cloned();
-
-  Ok(LibraryParts {
-    path,
-    pack_name,
-    pack_version,
-    classifier,
-    extension: file_ext,
-  })
-}
-
-pub fn convert_library_name_to_path(name: &str, native: Option<String>) -> SJMCLResult<String> {
-  let LibraryParts {
-    path,
-    pack_name,
-    pack_version,
-    classifier,
-    extension: file_ext,
-  } = parse_library_name(name, native)?;
-
-  let file_name = [
-    pack_name.clone(),
-    pack_version.clone(),
-    classifier.unwrap_or_default(),
-  ]
-  .iter()
-  .filter(|s| !s.is_empty())
-  .map(|s| s.as_str())
-  .collect::<Vec<&str>>()
-  .join("-")
-    + "."
-    + &file_ext;
-
-  Ok(format!("{path}/{pack_name}/{pack_version}/{file_name}"))
-}
-
-#[derive(Debug, Hash, Eq, PartialEq)]
-struct LibraryKey {
-  path: String,
-  pack_name: String,
-  classifier: Option<String>,
-  extension: String,
-}
-
-// merge two vectors of libraries, remove duplicates by name, keep the one with the highest version. also remove libraries with invalid names
-pub fn merge_library_lists(
-  libraries_a: &[LibrariesValue],
-  libraries_b: &[LibrariesValue],
-) -> Vec<LibrariesValue> {
-  let mut library_map: HashMap<LibraryKey, LibrariesValue> = HashMap::new();
-
-  for library in libraries_a.iter().chain(libraries_b.iter()) {
-    if let Ok(library_parts) = parse_library_name(&library.name, None) {
-      let key = LibraryKey {
-        path: library_parts.path,
-        pack_name: library_parts.pack_name,
-        classifier: library_parts.classifier,
-        extension: library_parts.extension,
-      };
-
-      let new_version = &library_parts.pack_version;
-
-      if let Some(existing_library) = library_map.get(&key) {
-        let existing_version = parse_library_name(&existing_library.name, None)
-          .map(|parts| parts.pack_version)
-          .unwrap_or("0.1.0".to_string());
-
-        if parse_sem_version(new_version) > parse_sem_version(&existing_version) {
-          library_map.insert(key, library.clone());
-        }
-      } else {
-        library_map.insert(key, library.clone());
-      }
-    }
-  }
-
-  library_map.into_values().collect()
-}
-
-fn parse_sem_version(version: &str) -> Version {
-  Version::parse(version).unwrap_or_else(|_| {
-    let mut parts = version.split('.').collect::<Vec<_>>();
-    while parts.len() < 3 {
-      parts.push("0");
-    }
-    Version::parse(&parts[..3].join(".")).unwrap_or_else(|_| Version::new(0, 1, 0))
-  })
-}
-
-pub fn get_nonnative_library_paths(
-  client_info: &McClientInfo,
-  library_path: &Path,
-) -> SJMCLResult<Vec<PathBuf>> {
-  let mut libraries = Vec::new();
-  let feature = FeaturesInfo::default();
-
-  for library in &client_info.libraries {
-    if library.is_allowed(&feature).unwrap_or(false) && library.natives.is_none() {
-      libraries.push(library.clone());
-    }
-  }
-
-  libraries = merge_library_lists(&libraries, &[]);
-
-  libraries
-    .iter()
-    .map(|lib| Ok(library_path.join(convert_library_name_to_path(&lib.name, None)?)))
-    .collect()
-}
-
-pub fn get_native_library_paths(
-  client_info: &McClientInfo,
-  library_path: &Path,
-) -> SJMCLResult<Vec<PathBuf>> {
-  let mut result = Vec::new();
-  let feature = FeaturesInfo::default();
-  for library in &client_info.libraries {
-    if !library.is_allowed(&feature).unwrap_or(false) || library.natives.is_none() {
-      continue;
-    }
-    let native_str = if let Some(native_fn) = Some(&get_natives_string) {
-      library.natives.as_ref().and_then(native_fn)
-    } else {
-      None
-    };
-
-    let path = convert_library_name_to_path(&library.name, native_str)?;
-    result.push(library_path.join(path));
-  }
-  Ok(result)
-}
-
 pub async fn extract_native_libraries(
   client_info: &McClientInfo,
   library_path: &Path,
@@ -399,4 +365,38 @@ pub async fn extract_native_libraries(
   }
 
   Ok(())
+}
+
+pub async fn get_invalid_assets(
+  app: &AppHandle,
+  client_info: &McClientInfo,
+  source: SourceType,
+  asset_path: &Path,
+  check_hash: bool,
+) -> SJMCLResult<Vec<PTaskParam>> {
+  let assets_download_api = get_download_api(source, ResourceType::Assets)?;
+  let asset_index_path = asset_path.join(format!("indexes/{}.json", client_info.asset_index.id));
+  let asset_index = load_asset_index(app, &asset_index_path, &client_info.asset_index.url).await?;
+
+  let base_path = asset_path.to_path_buf();
+
+  validate_files_concurrently(
+    asset_index.objects.into_values(),
+    check_hash,
+    move |item, check_hash| {
+      let assets_download_api = assets_download_api.clone();
+      let base_path = base_path.clone();
+
+      async move {
+        let path_in_repo = format!("{}/{}", &item.hash[..2], item.hash);
+        let dest = base_path.join(format!("objects/{}", path_in_repo));
+        let download_url = assets_download_api
+          .join(&path_in_repo)
+          .map_err(crate::error::SJMCLError::from)?;
+
+        validate_file_with_hash(dest, item.hash, download_url, check_hash).await
+      }
+    },
+  )
+  .await
 }
