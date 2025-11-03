@@ -16,12 +16,12 @@ use semver::Version;
 use std::collections::{HashMap, HashSet};
 use std::io::Cursor;
 use std::path::{Path, PathBuf};
+use std::sync::OnceLock;
+use sysinfo::{CpuRefreshKind, RefreshKind, System};
 use tauri::AppHandle;
 use tokio::fs;
 use url::Url;
 use zip::ZipArchive;
-
-const CONCURRENT_HASH_CHECKS: usize = 16;
 
 #[derive(Debug, Hash, Eq, PartialEq)]
 struct LibraryKey {
@@ -37,6 +37,19 @@ pub struct LibraryParts {
   pub pack_version: String,
   pub classifier: Option<String>,
   pub extension: String,
+}
+
+fn get_concurrent_hash_checks() -> usize {
+  static CONCURRENT_LIMIT: OnceLock<usize> = OnceLock::new();
+
+  *CONCURRENT_LIMIT.get_or_init(|| {
+    let mut sys =
+      System::new_with_specifics(RefreshKind::nothing().with_cpu(CpuRefreshKind::everything()));
+    std::thread::sleep(sysinfo::MINIMUM_CPU_UPDATE_INTERVAL);
+    sys.refresh_cpu_usage();
+    let cpu_count = sys.cpus().len();
+    (cpu_count * 3).max(8).min(32)
+  })
 }
 
 fn parse_sem_version(version: &str) -> Version {
@@ -149,9 +162,11 @@ where
   F: Fn(T, bool) -> Fut,
   Fut: std::future::Future<Output = SJMCLResult<Option<PTaskParam>>>,
 {
+  let concurrent_limit = get_concurrent_hash_checks();
+
   let results: Vec<SJMCLResult<Option<PTaskParam>>> = stream::iter(items)
     .map(|item| processor(item, check_hash))
-    .buffer_unordered(CONCURRENT_HASH_CHECKS)
+    .buffer_unordered(concurrent_limit)
     .collect()
     .await;
 
