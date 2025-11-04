@@ -334,9 +334,27 @@ pub async fn libraries_to_info(
         loader_version = Some(v.to_string());
         break;
       }
-      ("net.neoforged", "neoforge") => {
+      ("net.neoforged.fancymodloader", _) | ("net.neoforged", "fancymodloader") => {
         loader_type = ModLoaderType::NeoForge;
-        loader_version = Some(v.to_string());
+        let arguments = client.arguments.clone();
+        // ref: https://github.com/HMCL-dev/HMCL/pull/3638/files
+        if let Some(args) = arguments {
+          for (i, item) in args.game.iter().enumerate() {
+            if item.value[0].contains("--fml.neoForgeVersion")
+              || item.value[0].contains("--fml.forgeVersion")
+            {
+              let next = args
+                .game
+                .get(i + 1)
+                .and_then(|it| it.value.get(0))
+                .cloned()
+                .unwrap_or_default();
+              if !next.is_empty() {
+                loader_version = Some(next);
+              }
+            }
+          }
+        }
         break;
       }
       ("net.minecraftforge", "forge") | ("net.minecraftforge", "fmlloader") => {
