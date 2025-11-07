@@ -14,6 +14,7 @@ use account::helpers::authlib_injector::info::refresh_and_update_auth_servers;
 use account::helpers::offline::yggdrasil_server::YggdrasilServer;
 use account::models::AccountInfo;
 use instance::helpers::misc::refresh_and_update_instances;
+use instance::helpers::mods::common::LocalModTranslationsCache;
 use instance::models::misc::Instance;
 use launch::models::LaunchingState;
 use launcher_config::helpers::java::refresh_and_update_javas;
@@ -193,6 +194,9 @@ pub async fn run() {
       app.manage(Mutex::new(mod_database));
 
       app.manage(Box::pin(TaskMonitor::new(app.handle().clone())));
+
+      let local_mod_translations = LocalModTranslationsCache::load().unwrap_or_default();
+      app.manage(Mutex::new(local_mod_translations));
 
       let client = build_sjmcl_client(app.handle(), true, false);
       app.manage(client);
