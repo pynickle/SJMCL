@@ -126,28 +126,24 @@ async fn validate_file_with_hash(
 ) -> SJMCLResult<Option<PTaskParam>> {
   let exists = fs::try_exists(&file_path).await?;
 
-  if !exists {
+  let needs_download = !exists || {
+    if check_hash {
+      let hash = expected_hash.clone();
+      let path = file_path.clone();
+      let is_valid = tokio::task::spawn_blocking(move || validate_sha1(path, hash).is_ok()).await?;
+      !is_valid
+    } else {
+      false
+    }
+  };
+
+  if needs_download {
     return Ok(Some(PTaskParam::Download(DownloadParam {
       src: download_url,
       dest: file_path,
       filename: None,
       sha1: Some(expected_hash),
     })));
-  }
-
-  if check_hash {
-    let hash = expected_hash.clone();
-    let path = file_path.clone();
-    let is_valid = tokio::task::spawn_blocking(move || validate_sha1(path, hash).is_ok()).await?;
-
-    if !is_valid {
-      return Ok(Some(PTaskParam::Download(DownloadParam {
-        src: download_url,
-        dest: file_path,
-        filename: None,
-        sha1: Some(expected_hash),
-      })));
-    }
   }
 
   Ok(None)
