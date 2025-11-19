@@ -11,6 +11,7 @@ use crate::resource::models::{ResourceType, SourceType};
 use crate::tasks::download::DownloadParam;
 use crate::tasks::PTaskParam;
 use crate::utils::fs::validate_sha1;
+use crate::utils::sys_info::get_concurrent_limit;
 use futures::stream::{self, StreamExt};
 use semver::Version;
 use std::collections::{HashMap, HashSet};
@@ -20,6 +21,7 @@ use std::sync::OnceLock;
 use sysinfo::{CpuRefreshKind, RefreshKind, System};
 use tauri::AppHandle;
 use tokio::fs;
+use tokio::sync::Semaphore;
 use url::Url;
 use zip::ZipArchive;
 
@@ -37,19 +39,6 @@ pub struct LibraryParts {
   pub pack_version: String,
   pub classifier: Option<String>,
   pub extension: String,
-}
-
-fn get_concurrent_hash_checks() -> usize {
-  static CONCURRENT_LIMIT: OnceLock<usize> = OnceLock::new();
-
-  *CONCURRENT_LIMIT.get_or_init(|| {
-    let mut sys =
-      System::new_with_specifics(RefreshKind::nothing().with_cpu(CpuRefreshKind::everything()));
-    std::thread::sleep(sysinfo::MINIMUM_CPU_UPDATE_INTERVAL);
-    sys.refresh_cpu_usage();
-    let cpu_count = sys.cpus().len();
-    (cpu_count * 3).max(8).min(32)
-  })
 }
 
 fn parse_sem_version(version: &str) -> Version {
@@ -150,20 +139,34 @@ async fn validate_file_with_hash(
 }
 
 async fn validate_files_concurrently<T, F, Fut>(
-  items: impl Iterator<Item = T>,
+  items: impl IntoIterator<Item = T>,
   check_hash: bool,
   processor: F,
 ) -> SJMCLResult<Vec<PTaskParam>>
 where
-  F: Fn(T, bool) -> Fut,
-  Fut: std::future::Future<Output = SJMCLResult<Option<PTaskParam>>>,
+  T: Send + Sync + 'static,
+  F: Fn(T, bool) -> Fut + Send + Sync + Clone + 'static,
+  Fut: std::future::Future<Output = SJMCLResult<Option<PTaskParam>>> + Send,
 {
-  let concurrent_limit = get_concurrent_hash_checks();
+  let max_concurrent = get_concurrent_limit(3.0);
+  let semaphore = std::sync::Arc::new(Semaphore::new(max_concurrent));
 
-  let results: Vec<SJMCLResult<Option<PTaskParam>>> = stream::iter(items)
-    .map(|item| processor(item, check_hash))
-    .buffer_unordered(concurrent_limit)
-    .collect()
+  let items_vec: Vec<T> = items.into_iter().collect();
+  let processor = std::sync::Arc::new(processor);
+
+  let results = stream::iter(items_vec)
+    .map(|item| {
+      let permit = semaphore.clone().acquire_owned();
+      let processor = processor.clone();
+
+      async move {
+        let _permit = permit.await;
+
+        processor(item, check_hash).await
+      }
+    })
+    .buffer_unordered(max_concurrent)
+    .collect::<Vec<_>>()
     .await;
 
   let mut params = Vec::new();
@@ -351,6 +354,8 @@ pub async fn extract_native_libraries(
     fs::create_dir(natives_dir).await?;
   }
 
+  let max_concurrent = get_concurrent_limit(1.5);
+
   let native_libraries = get_native_library_paths(client_info, library_path)?;
 
   let results: Vec<_> = stream::iter(native_libraries)
@@ -364,7 +369,7 @@ pub async fn extract_native_libraries(
         Ok::<_, crate::error::SJMCLError>(())
       }
     })
-    .buffer_unordered(4)
+    .buffer_unordered(max_concurrent)
     .collect::<Vec<_>>()
     .await;
 
