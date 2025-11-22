@@ -487,7 +487,7 @@ where
       }
       PermissionOperation::Downgrade => {
         // "downgrade" operation: only remove the permissions if they are present
-        if current_mode & perm_mask == perm_mask {
+        if current_mode & perm_mask != 0 {
           let new_mode = current_mode & !perm_mask; // Clear the respective permission
           permissions.set_mode(new_mode);
           fs::set_permissions(&path, permissions)?;
