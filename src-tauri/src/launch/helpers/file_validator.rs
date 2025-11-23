@@ -148,6 +148,7 @@ where
   F: Fn(T, bool) -> Fut + Send + Sync + Clone + 'static,
   Fut: std::future::Future<Output = SJMCLResult<Option<PTaskParam>>> + Send,
 {
+  // 3.0 → Used for downloads & hash validation (lightweight I/O-bound — higher concurrency is safe and efficient)
   let max_concurrent = get_concurrent_limit(3.0);
   let semaphore = std::sync::Arc::new(Semaphore::new(max_concurrent));
 
@@ -354,6 +355,7 @@ pub async fn extract_native_libraries(
     fs::create_dir(natives_dir).await?;
   }
 
+  // 1.5 → Used for native library extraction (mixed I/O + CPU, heavier work — keep conservative to avoid blocking)
   let max_concurrent = get_concurrent_limit(1.5);
 
   let native_libraries = get_native_library_paths(client_info, library_path)?;
