@@ -2,7 +2,7 @@ use super::helpers::loader::fabric::remove_fabric_api_mods;
 use crate::error::SJMCLResult;
 use crate::instance::constants::TRANSLATION_CACHE_EXPIRY_HOURS;
 use crate::instance::helpers::client_json::{replace_native_libraries, McClientInfo};
-use crate::instance::helpers::game_version::{compare_game_versions, get_major_game_version};
+use crate::instance::helpers::game_version::compare_game_versions;
 use crate::instance::helpers::loader::common::{execute_processors, install_mod_loader};
 use crate::instance::helpers::loader::forge::InstallProfile;
 use crate::instance::helpers::misc::{
@@ -80,25 +80,8 @@ pub async fn retrieve_instance_list(app: AppHandle) -> SJMCLResult<Vec<InstanceS
         global_version_isolation
       };
 
-    summary_list.push(InstanceSummary {
-      id: id.clone(),
-      name: instance.name.clone(),
-      description: instance.description.clone(),
-      icon_src: instance.icon_src.clone(),
-      starred: instance.starred,
-      play_time: instance.play_time,
-      version_path: instance.version_path.clone(),
-      version: instance.version.clone(),
-      mod_loader: instance.mod_loader.clone(),
-      // skip fallback remote fetch in `get_major_game_version` and `compare_game_versions` to avoid instance list load delay.
-      // ref: https://github.com/UNIkeEN/SJMCL/pull/799
-      major_version: get_major_game_version(&app, &instance.version, false).await,
-      support_quick_play: compare_game_versions(&app, &instance.version, "23w14a", false)
-        .await
-        .is_ge(),
-      use_spec_game_config: instance.use_spec_game_config,
-      is_version_isolated,
-    });
+    summary_list
+      .push(InstanceSummary::from_instance(&app, id.clone(), instance, is_version_isolated).await);
   }
 
   // ensure an instance is selected if instance list is not empty

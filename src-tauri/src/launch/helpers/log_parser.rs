@@ -17,11 +17,7 @@ pub fn parse_crash_report_path_from_log<P: AsRef<Path>>(log_path: P) -> Option<P
   // Move to the end of the file and only read the last chunk for parsing.
   let file_size = reader.seek(SeekFrom::End(0)).ok()?;
   let read_back_bytes: u64 = 8192; // last ~8KB
-  let start_pos = if file_size > read_back_bytes {
-    file_size - read_back_bytes
-  } else {
-    0
-  };
+  let start_pos = file_size.saturating_sub(read_back_bytes);
   reader.seek(SeekFrom::Start(start_pos)).ok()?;
 
   let mut content = String::new();
