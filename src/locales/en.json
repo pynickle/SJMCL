@@ -1221,8 +1221,8 @@
     "description": "Instance Description",
     "icon": "Instance Icon",
     "applySettings": "Apply the following specific settings",
-    "restoreSettings": "Restore to default settings",
-    "restoreSettingsDesc": "Restore the following specific settings to their default values",
+    "restoreSettings": "Reset specific settings",
+    "restoreSettingsDesc": "Reset the following specific settings to the global game settings.",
     "restore": "Restore",
     "errorMessage": {
       "error-1": "Instance name cannot be empty",
