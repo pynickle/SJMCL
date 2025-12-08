@@ -39,6 +39,10 @@
           "title": "LittleSkin",
           "description": "感謝 LittleSkin 和 @tnqzh123 對登入流程設計的幫助"
         },
+        "scl": {
+          "title": "Swift Craft Launcher",
+          "description": "感謝 SCL 開發團隊與我們的持續交流與相互啟發"
+        },
         "sinter": {
           "title": "Sinter",
           "description": "在 Windows 和 Linux 平臺作為啟動器介面字型，遵循 SIL 協議使用"
@@ -226,12 +230,19 @@
     "button": {
       "addAndImport": "新增與匯入",
       "globalSettings": "全域性遊戲設定",
-      "launch": "啟動遊戲"
+      "launch": "啟動遊戲",
+      "sortAndFilter": "排序與篩選"
     },
     "viewTypeList": {
       "grid": "網格檢視",
       "list": "列表檢視"
     },
+    "sortByTypeList": {
+      "versionAsc": "遊戲版本升序",
+      "versionDesc": "遊戲版本降序",
+      "name": "例項名稱"
+    },
+    "sortBy": "排序方式",
     "title": "全部例項"
   },
   "AppearanceSettingsPage": {
@@ -1864,7 +1875,8 @@
           "title": "離線角色新增失敗",
           "description": {
             "DUPLICATE": "角色已存在",
-            "INVALID": "UUID 無效"
+            "INVALID": "UUID 無效",
+            "TEXTURE_ERROR": "角色皮膚獲取失敗"
           }
         }
       },

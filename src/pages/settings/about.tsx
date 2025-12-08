@@ -236,6 +236,24 @@ const AboutSettingsPage = () => {
             />
           ),
         },
+        {
+          title: t("AboutSettingsPage.ack.settings.scl.title"),
+          description: t("AboutSettingsPage.ack.settings.scl.description"),
+          children: (
+            <CommonIconButton
+              label="https://suhang12332.github.io/swift-craft-launcher-web.github.io/"
+              icon="external"
+              withTooltip
+              tooltipPlacement="bottom-end"
+              size="xs"
+              onClick={() => {
+                openUrl(
+                  "https://suhang12332.github.io/swift-craft-launcher-web.github.io/"
+                );
+              }}
+            />
+          ),
+        },
       ],
     },
     {

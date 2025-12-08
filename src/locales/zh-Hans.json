@@ -39,6 +39,10 @@
           "title": "LittleSkin",
           "description": "感谢 LittleSkin 和 @tnqzh123 对登录流程设计的帮助"
         },
+        "scl": {
+          "title": "Swift Craft Launcher",
+          "description": "感谢 SCL 开发团队与我们的持续交流与相互启发"
+        },
         "sinter": {
           "title": "Sinter",
           "description": "在 Windows 和 Linux 平台作为启动器界面字体，遵循 SIL 协议使用"

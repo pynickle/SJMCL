@@ -39,6 +39,10 @@
           "title": "LittleSkin",
           "description": "Thanks to LittleSkin and @tnqzh123 for their help with the login process design"
         },
+        "scl": {
+          "title": "Swift Craft Launcher",
+          "description": "Thanks to the SCL developers for the ongoing communication and mutual inspiration with us"
+        },
         "sinter": {
           "title": "Sinter",
           "description": "Used as the interface font on Windows and Linux platforms, under the SIL License"
