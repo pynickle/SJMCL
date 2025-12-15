@@ -55,10 +55,6 @@ export const DiscoverSourcesPage = () => {
   const handleRemoveSource = (urlToRemove: string) => {
     const updated = sources.filter(([url]) => url !== urlToRemove);
     update("discoverSourceEndpoints", updated);
-    setSourcesInfo(
-      updated.map(([endpointUrl, enabled]) => ({ endpointUrl, enabled }))
-    );
-    handleFetchNewsSourcesInfo();
   };
 
   const handleToggleSource = (urlToToggle: string, enabled: boolean) => {
@@ -66,18 +62,18 @@ export const DiscoverSourcesPage = () => {
       url === urlToToggle ? [url, enabled] : [url, isEnabled]
     );
     update("discoverSourceEndpoints", updated);
-    handleFetchNewsSourcesInfo();
   };
 
   useEffect(() => {
     if (sources.length === 0) return;
     // initially load url from config
-    setSourcesInfo(
-      sources.map(([endpointUrl, enabled]) => ({
-        endpointUrl,
-        enabled,
-      }))
-    );
+    setSourcesInfo((prev) => {
+      const prevMap = new Map(prev.map((x) => [x.endpointUrl, x]));
+      return sources.map(([endpointUrl, enabled]) => {
+        const old = prevMap.get(endpointUrl);
+        return old ? { ...old, enabled } : { endpointUrl, enabled };
+      });
+    });
     // query details use invoke
     handleFetchNewsSourcesInfo();
   }, [sources, handleFetchNewsSourcesInfo]);
