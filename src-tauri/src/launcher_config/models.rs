@@ -82,7 +82,7 @@ pub enum LauncherVisiablity {
 //
 structstruck::strike! {
   #[strikethrough[derive(Partial, Debug, PartialEq, Eq, Clone, Deserialize, Serialize)]]
-  #[strikethrough[serde(rename_all = "camelCase", deny_unknown_fields)]]
+  #[strikethrough[serde(rename_all = "camelCase")]]
   #[strikethrough[derive(SmartDefault)]]
   #[strikethrough[serde(default)]]
   pub struct GameConfig {
@@ -166,7 +166,7 @@ pub enum ProxyType {
 
 structstruck::strike! {
   #[strikethrough[derive(Partial, Debug, PartialEq, Eq, Clone, Deserialize, Serialize)]]
-  #[strikethrough[serde(rename_all = "camelCase", deny_unknown_fields)]]
+  #[strikethrough[serde(rename_all = "camelCase")]]
   #[strikethrough[derive(SmartDefault)]]
   #[strikethrough[serde(default)]]
   pub struct LauncherConfig {
