@@ -253,6 +253,7 @@ structstruck::strike! {
         pub launch_page_quick_switch: bool,
         #[default = true]
         pub resource_translation: bool, // only available in zh-Hans
+        #[default = true]
         pub skip_first_screen_options: bool,  // only available in zh-Hans
       },
       pub advanced: struct GeneralConfigAdvanced {
