@@ -39,6 +39,10 @@
           "title": "LittleSkin",
           "description": "感谢 LittleSkin 和 @tnqzh123 对登录流程设计的帮助"
         },
+        "scl": {
+          "title": "Swift Craft Launcher",
+          "description": "感谢 SCL 开发团队与我们的持续交流与相互启发"
+        },
         "sinter": {
           "title": "Sinter",
           "description": "在 Windows 和 Linux 平台作为启动器界面字体，遵循 SIL 协议使用"
@@ -226,12 +230,19 @@
     "button": {
       "addAndImport": "添加与导入",
       "globalSettings": "全局游戏设置",
-      "launch": "启动游戏"
+      "launch": "启动游戏",
+      "sortAndFilter": "排序与筛选"
     },
     "viewTypeList": {
       "grid": "网格视图",
       "list": "列表视图"
     },
+    "sortByTypeList": {
+      "versionAsc": "游戏版本升序",
+      "versionDesc": "游戏版本降序",
+      "name": "实例名称"
+    },
+    "sortBy": "排序方式",
     "title": "全部实例"
   },
   "AppearanceSettingsPage": {
@@ -840,7 +851,7 @@
   },
   "GameLogPage": {
     "placeholder": "输入关键词筛选",
-    "exportLogs": "导出日志",
+    "revealRawLog": "显示原始日志文件",
     "clearLogs": "清除所有日志",
     "scrollToBottom": "滚动到底部"
   },
@@ -1174,6 +1185,9 @@
       "launch": "启动实例"
     }
   },
+  "InstanceIconSelector": {
+    "customize": "自定义图像"
+  },
   "InstanceMenu": {
     "label": {
       "details": "实例详情",
@@ -1369,6 +1383,11 @@
     "placeholder": {
       "javaPath": "请输入或选择 Java 可执行文件路径"
     }
+  },
+  "MCVersionNumberHelper": {
+    "content": "自 2026 年起，Minecraft 版本号采取新的命名规则，以年份作为版本号首位（如 26.1）以取代原有的 1.x 版本号规则。",
+    "linkText": "阅读官方文档",
+    "url": "https://www.minecraft.net/zh-hans/article/minecraft-new-version-numbering-system"
   },
   "MemoryStatusProgress": {
     "title": "内存状态",
@@ -1864,7 +1883,8 @@
           "title": "离线角色添加失败",
           "description": {
             "DUPLICATE": "角色已存在",
-            "INVALID": "UUID 无效"
+            "INVALID": "UUID 无效",
+            "TEXTURE_ERROR": "角色皮肤获取失败"
           }
         }
       },
@@ -1890,7 +1910,7 @@
             "NOT_FOUND": "认证服务器不存在",
             "CANCELLED": "已取消",
             "INVALID": "无效的认证服务器地址",
-            "NO_MINECRAFT_PROFILE": "未找到角色，请确认是否已购买 Minecraft"
+            "NO_MINECRAFT_PROFILE": "未找到角色，请确认是否已购买 Minecraft 并创建角色"
           }
         }
       },
@@ -1905,7 +1925,7 @@
             "NETWORK_ERROR": "无法连接至认证服务器",
             "INVALID": "不支持离线角色刷新",
             "CANCELLED": "已取消",
-            "NO_MINECRAFT_PROFILE": "未找到角色，请确认是否已购买 Minecraft"
+            "NO_MINECRAFT_PROFILE": "未找到角色，请确认是否已购买 Minecraft 并创建角色"
           }
         }
       },
@@ -2372,6 +2392,12 @@
             "MODPACK_MANIFEST_PARSE_ERROR": "整合包清单文件解析错误"
           }
         }
+      },
+      "addCustomInstanceIcon": {
+        "success": "自定义实例图标添加成功",
+        "error": {
+          "title": "自定义实例图标添加失败"
+        }
       }
     },
     "task": {
@@ -2532,12 +2558,11 @@
       "title": "欢迎！"
     },
     "body": {
-      "part1": "欢迎使用 SJMCL！在开始使用之前，请务必阅读并同意我们的",
-      "terms": "用户协议",
-      "periods": "。"
+      "text": "欢迎使用 SJMCL！在开始使用之前，请务必阅读并同意我们的<terms>用户协议</terms>。"
     },
     "warning": {
-      "unstableVersion": "您正在使用{{versionLabel}}的 SJMCL，部分功能可能不稳定或未开发完成，欢迎报告使用问题与功能建议。"
+      "unstableVersion": "您正在使用{{versionLabel}}的 SJMCL，部分功能可能不稳定或未开发完成，欢迎报告使用问题与功能建议。",
+      "winArm64Notice": "SJMCL 现已支持 Windows on Arm 平台。<br/>如您正在使用 <b>高通</b> 平台，您可能需要安装 <glpack>OpenGL 兼容包</glpack> 后才能进行游戏。"
     },
     "button": {
       "exit": "退出",

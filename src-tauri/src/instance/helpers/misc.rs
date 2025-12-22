@@ -9,7 +9,7 @@ use crate::instance::models::misc::{
 use crate::launcher_config::helpers::misc::get_global_game_config;
 use crate::launcher_config::models::{GameConfig, GameDirectory, LauncherConfig};
 use crate::resource::helpers::misc::get_source_priority_list;
-use crate::storage::{load_json_async, save_json_async};
+use crate::storage::load_json_async;
 use sanitize_filename;
 use serde_json::Value;
 use std::collections::HashMap;
@@ -218,7 +218,7 @@ pub async fn refresh_instances(
           ModLoaderStatus::Installed => Ok(()),
         }
       } {
-        eprintln!("Failed to install mod loader for {}: {:?}", name, e);
+        log::warn!("Failed to install mod loader for {}: {:?}", name, e);
         cfg_read.mod_loader.status = ModLoaderStatus::DownloadFailed;
         cfg_read.save_json_cfg().await?;
         continue;

@@ -21,6 +21,7 @@ pub enum PlayerType {
 }
 #[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize, Display, Default, EnumIter)]
 #[serde(rename_all = "lowercase")]
+#[strum(serialize_all = "lowercase")]
 pub enum PresetRole {
   #[default]
   Steve,
@@ -80,7 +81,7 @@ pub struct Player {
   pub id: String,
   pub name: String,
   pub uuid: Uuid,
-  pub avatar: ImageWrapper,
+  pub avatar: Vec<ImageWrapper>, // [face, hat]
   pub player_type: PlayerType,
   pub auth_account: Option<String>,
   pub auth_server: Option<AuthServer>,
@@ -110,7 +111,7 @@ impl From<PlayerInfo> for Player {
       id: player_info.id,
       name: player_info.name,
       uuid: player_info.uuid,
-      avatar: draw_avatar(36, &player_info.textures[0].image.image).into(),
+      avatar: draw_avatar(36, &player_info.textures[0].image.image),
       player_type: player_info.player_type,
       auth_account: player_info.auth_account,
       access_token: player_info.access_token,

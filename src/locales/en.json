@@ -39,6 +39,10 @@
           "title": "LittleSkin",
           "description": "Thanks to LittleSkin and @tnqzh123 for their help with the login process design"
         },
+        "scl": {
+          "title": "Swift Craft Launcher",
+          "description": "Thanks to the SCL developers for the ongoing communication and mutual inspiration with us"
+        },
         "sinter": {
           "title": "Sinter",
           "description": "Used as the interface font on Windows and Linux platforms, under the SIL License"
@@ -226,12 +230,19 @@
     "button": {
       "addAndImport": "Add & Import",
       "globalSettings": "Global Game Settings",
-      "launch": "Launch Game"
+      "launch": "Launch Game",
+      "sortAndFilter": "Sort and Filter"
     },
     "viewTypeList": {
       "grid": "Grid View",
       "list": "List View"
     },
+    "sortByTypeList": {
+      "versionAsc": "Game Version Ascending",
+      "versionDesc": "Game Version Descending",
+      "name": "Instance Name"
+    },
+    "sortBy": "Sort by",
     "title": "All Instances"
   },
   "AppearanceSettingsPage": {
@@ -840,12 +851,12 @@
   },
   "GameLogPage": {
     "placeholder": "Filter by Text",
-    "exportLogs": "Export Logs",
+    "revealRawLog": "Reveal Raw Log File",
     "clearLogs": "Clear All Logs",
     "scrollToBottom": "Scroll to Bottom"
   },
   "GameVersionSelector": {
-    "old_beta": "Old Beta",
+    "old_beta": "Beta",
     "release": "Release",
     "snapshot": "Snapshot",
     "april_fools": "April Fools",
@@ -1174,6 +1185,9 @@
       "launch": "Launch Instance"
     }
   },
+  "InstanceIconSelector": {
+    "customize": "Customize Icon"
+  },
   "InstanceMenu": {
     "label": {
       "details": "Instance Details",
@@ -1214,8 +1228,8 @@
     "description": "Instance Description",
     "icon": "Instance Icon",
     "applySettings": "Apply the following specific settings",
-    "restoreSettings": "Restore to default settings",
-    "restoreSettingsDesc": "Restore the following specific settings to their default values",
+    "restoreSettings": "Reset specific settings",
+    "restoreSettingsDesc": "Reset the following specific settings to the global game settings.",
     "restore": "Restore",
     "errorMessage": {
       "error-1": "Instance name cannot be empty",
@@ -1369,6 +1383,11 @@
     "placeholder": {
       "javaPath": "Please enter or select the Java executable file path"
     }
+  },
+  "MCVersionNumberHelper": {
+    "content": "Starting in 2026, Minecraft adopts a new version numbering system. The version numbers will begin with the release year (e.g., 26.1), replacing the previous 1.x versioning scheme.",
+    "linkText": "Read the official article",
+    "url": "https://www.minecraft.net/en-us/article/minecraft-new-version-numbering-system"
   },
   "MemoryStatusProgress": {
     "title": "Memory Status",
@@ -1864,7 +1883,8 @@
           "title": "Failed to add offline player",
           "description": {
             "DUPLICATE": "Player already exists",
-            "INVALID": "UUID is invalid"
+            "INVALID": "UUID is invalid",
+            "TEXTURE_ERROR": "Unable to get player texture"
           }
         }
       },
@@ -2372,6 +2392,12 @@
             "MODPACK_MANIFEST_PARSE_ERROR": "Modpack manifest file parse error"
           }
         }
+      },
+      "addCustomInstanceIcon": {
+        "success": "Successfully added custom instance icon",
+        "error": {
+          "title": "Failed to add custom instance icon"
+        }
       }
     },
     "task": {
@@ -2532,12 +2558,11 @@
       "title": "Welcome!"
     },
     "body": {
-      "part1": "Welcome to SJMCL! Before you start, please be sure to read and agree to our ",
-      "terms": "User Agreement",
-      "periods": "."
+      "text": "Welcome to SJMCL! Before you start, please be sure to read and agree to our <terms>User Agreement</terms>."
     },
     "warning": {
-      "unstableVersion": "You are using the {{versionLabel}} of SJMCL. Some features may be unstable or incomplete. Bug reports and feature requests are welcome."
+      "unstableVersion": "You are using the {{versionLabel}} of SJMCL. Some features may be unstable or incomplete. Bug reports and feature requests are welcome.",
+      "winArm64Notice": "SJMCL now supports Windows on Arm. If you are using a <b>QUALCOMM</b> platform, you may need to install the <glpack>OpenGL Compatibility Pack</glpack> before launching the game."
     },
     "button": {
       "exit": "Exit",

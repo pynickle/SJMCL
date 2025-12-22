@@ -39,6 +39,10 @@
           "title": "LittleSkin",
           "description": "感謝 LittleSkin 和 @tnqzh123 對登入流程設計的幫助"
         },
+        "scl": {
+          "title": "Swift Craft Launcher",
+          "description": "感謝 SCL 開發團隊與我們的持續交流與相互啟發"
+        },
         "sinter": {
           "title": "Sinter",
           "description": "在 Windows 和 Linux 平臺作為啟動器介面字型，遵循 SIL 協議使用"
@@ -226,12 +230,19 @@
     "button": {
       "addAndImport": "新增與匯入",
       "globalSettings": "全域性遊戲設定",
-      "launch": "啟動遊戲"
+      "launch": "啟動遊戲",
+      "sortAndFilter": "排序與篩選"
     },
     "viewTypeList": {
       "grid": "網格檢視",
       "list": "列表檢視"
     },
+    "sortByTypeList": {
+      "versionAsc": "遊戲版本升序",
+      "versionDesc": "遊戲版本降序",
+      "name": "例項名稱"
+    },
+    "sortBy": "排序方式",
     "title": "全部例項"
   },
   "AppearanceSettingsPage": {
@@ -840,7 +851,7 @@
   },
   "GameLogPage": {
     "placeholder": "輸入關鍵詞篩選",
-    "exportLogs": "匯出日誌",
+    "revealRawLog": "顯示原始日誌檔案",
     "clearLogs": "清除所有日誌",
     "scrollToBottom": "滾動到底部"
   },
@@ -1370,6 +1381,11 @@
       "javaPath": "請輸入或選擇 Java 可執行檔案路徑"
     }
   },
+  "MCVersionNumberHelper": {
+    "content": "自 2026 年起，Minecraft 版本號採取新的命名規則，以年份作為版本號首位（如 26.1）以取代原有的 1.x 版本號規則。",
+    "linkText": "閱讀官方文件",
+    "url": "https://www.minecraft.net/zh-hans/article/minecraft-new-version-numbering-system"
+  },
   "MemoryStatusProgress": {
     "title": "記憶體狀態",
     "info": "{{used}} / {{total}} GB 已使用",
@@ -1864,7 +1880,8 @@
           "title": "離線角色新增失敗",
           "description": {
             "DUPLICATE": "角色已存在",
-            "INVALID": "UUID 無效"
+            "INVALID": "UUID 無效",
+            "TEXTURE_ERROR": "角色皮膚獲取失敗"
           }
         }
       },
@@ -1890,7 +1907,7 @@
             "NOT_FOUND": "認證伺服器不存在",
             "CANCELLED": "已取消",
             "INVALID": "無效的認證伺服器地址",
-            "NO_MINECRAFT_PROFILE": "未找到角色，請確認是否已購買 Minecraft"
+            "NO_MINECRAFT_PROFILE": "未找到角色，請確認是否已購買 Minecraft 並建立角色"
           }
         }
       },
@@ -1905,7 +1922,7 @@
             "NETWORK_ERROR": "無法連線至認證伺服器",
             "INVALID": "不支援離線角色重新整理",
             "CANCELLED": "已取消",
-            "NO_MINECRAFT_PROFILE": "未找到角色，請確認是否已購買 Minecraft"
+            "NO_MINECRAFT_PROFILE": "未找到角色，請確認是否已購買 Minecraft 並建立角色"
           }
         }
       },
@@ -2532,9 +2549,7 @@
       "title": "歡迎！"
     },
     "body": {
-      "part1": "歡迎使用 SJMCL！在開始使用之前，請務必閱讀並同意我們的",
-      "terms": "使用者協議",
-      "periods": "。"
+      "text": "歡迎使用 SJMCL！在開始使用之前，請務必閱讀並同意我們的<terms>使用者協議</terms>。"
     },
     "warning": {
       "unstableVersion": "您正在使用{{versionLabel}}的 SJMCL，部分功能可能不穩定或未開發完成，歡迎報告使用問題與功能建議。"

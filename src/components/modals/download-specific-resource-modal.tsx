@@ -36,6 +36,7 @@ import { MenuSelector } from "@/components/common/menu-selector";
 import NavMenu from "@/components/common/nav-menu";
 import { OptionItem, OptionItemGroup } from "@/components/common/option-item";
 import { Section } from "@/components/common/section";
+import MCVersionNumberHelper from "@/components/mc-version-number-helper";
 import { useLauncherConfig } from "@/contexts/config";
 import { useGlobalData } from "@/contexts/global-data";
 import { useSharedModals } from "@/contexts/shared-modal";
@@ -56,7 +57,7 @@ import { ResourceService } from "@/services/resource";
 import { TaskService } from "@/services/task";
 import { ISOToDate } from "@/utils/datetime";
 import { translateTag } from "@/utils/resource";
-import { formatDisplayCount } from "@/utils/string";
+import { formatDisplayCount, sanitizeFileName } from "@/utils/string";
 
 interface DownloadSpecificResourceModalProps
   extends Omit<ModalProps, "children"> {
@@ -196,9 +197,9 @@ const DownloadSpecificResourceModal: React.FC<
     translatedName?: string
   ) => {
     const dir = await getDefaultFilePath();
-    const fileName = translatedName
-      ? `[${translatedName}] ${item.fileName}`
-      : item.fileName;
+    const fileName = sanitizeFileName(
+      translatedName ? `[${translatedName}] ${item.fileName}` : item.fileName
+    );
     const savepath = await save({
       defaultPath: dir + "/" + fileName,
     });
@@ -512,6 +513,7 @@ const DownloadSpecificResourceModal: React.FC<
             py={2}
             fontWeight={400}
             flexDir="row"
+            justify="space-between"
           >
             <OptionItem
               title={
@@ -560,49 +562,54 @@ const DownloadSpecificResourceModal: React.FC<
               fontWeight={400}
               flex={1}
             />
-            {resource.websiteUrl && (
-              <HStack spacing={1}>
-                <LuExternalLink />
-                <Link
-                  fontSize="xs"
-                  color={`${primaryColor}.500`}
-                  onClick={() => {
-                    resource.websiteUrl && openUrl(resource.websiteUrl);
-                  }}
-                >
-                  {resource.source}
-                </Link>
-              </HStack>
-            )}
-            {resource.mcmodId !== 0 && (
-              <HStack spacing={1} ml={2}>
-                <LuExternalLink />
-                <Link
-                  fontSize="xs"
-                  color={`${primaryColor}.500`}
-                  onClick={() => {
-                    resource.mcmodId &&
-                      openUrl(
-                        `https://www.mcmod.cn/class/${resource.mcmodId}.html`
-                      );
-                  }}
-                >
-                  MCMod
-                </Link>
-              </HStack>
-            )}
+            <HStack gap={2}>
+              {resource.websiteUrl && (
+                <HStack spacing={1}>
+                  <LuExternalLink />
+                  <Link
+                    fontSize="xs"
+                    color={`${primaryColor}.500`}
+                    onClick={() => {
+                      resource.websiteUrl && openUrl(resource.websiteUrl);
+                    }}
+                  >
+                    {resource.source}
+                  </Link>
+                </HStack>
+              )}
+              {resource.mcmodId !== 0 && (
+                <HStack spacing={1}>
+                  <LuExternalLink />
+                  <Link
+                    fontSize="xs"
+                    color={`${primaryColor}.500`}
+                    onClick={() => {
+                      resource.mcmodId &&
+                        openUrl(
+                          `https://www.mcmod.cn/class/${resource.mcmodId}.html`
+                        );
+                    }}
+                  >
+                    MCMod
+                  </Link>
+                </HStack>
+              )}
+            </HStack>
           </Card>
           <HStack align="center" justify="space-between" mb={3}>
-            <MenuSelector
-              options={versionLabels.map((item) => ({
-                value: item,
-                label: buildVersionLabelItem(item),
-              }))}
-              value={selectedVersionLabel}
-              onSelect={(value) => setSelectedVersionLabel(value as string)}
-              buttonProps={{ minW: "28" }}
-              menuListProps={{ maxH: "40vh", minW: 28, overflow: "auto" }}
-            />
+            <HStack>
+              <MenuSelector
+                options={versionLabels.map((item) => ({
+                  value: item,
+                  label: buildVersionLabelItem(item),
+                }))}
+                value={selectedVersionLabel}
+                onSelect={(value) => setSelectedVersionLabel(value as string)}
+                buttonProps={{ minW: "28" }}
+                menuListProps={{ maxH: "40vh", minW: 28, overflow: "auto" }}
+              />
+              <MCVersionNumberHelper placement="bottom-start" />
+            </HStack>
 
             <Box>
               {resource.type === OtherResourceType.Mod &&
