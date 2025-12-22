@@ -316,7 +316,7 @@ const SpotlightSearchModal: React.FC<Omit<ModalProps, "children">> = ({
         return [...cfResults, ...mrResults];
       } catch (error) {
         if (!signal?.aborted) {
-          console.error("Network search error:", error);
+          logger.error("Network search error:", error);
         }
         return [];
       }
@@ -358,7 +358,7 @@ const SpotlightSearchModal: React.FC<Omit<ModalProps, "children">> = ({
         })
         .catch((error) => {
           if (!controller.signal.aborted) {
-            console.error("Network search error:", error);
+            logger.error("Network search error:", error);
             setNetworkSearchResults([]);
             setIsSearching(false);
             searchAbortControllerRef.current = null;

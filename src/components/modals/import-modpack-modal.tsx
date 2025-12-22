@@ -233,7 +233,7 @@ const ImportModpackModal: React.FC<ImportModpackModalProps> = ({
         });
       }
     } catch (error) {
-      console.error("Error creating instance:", error);
+      logger.error("Error creating instance:", error);
     } finally {
       setIsBtnLoading(false);
     }
@@ -273,7 +273,7 @@ const ImportModpackModal: React.FC<ImportModpackModalProps> = ({
         }
       })
       .catch((error) => {
-        console.error("Error fetching modpack info:", error);
+        logger.error("Error fetching modpack info:", error);
       })
       .finally(() => {
         setIsPageLoading(false);
