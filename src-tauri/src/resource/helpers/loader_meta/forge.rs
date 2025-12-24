@@ -1,4 +1,4 @@
-use crate::error::{SJMCLError, SJMCLResult};
+use crate::error::SJMCLResult;
 use crate::instance::models::misc::ModLoaderType;
 use crate::resource::helpers::misc::get_download_api;
 use crate::resource::models::{ModLoaderResourceInfo, ResourceError, ResourceType, SourceType};
@@ -39,7 +39,6 @@ async fn get_forge_meta_by_game_version_bmcl(
                 description: info.modified,
                 stable: true,
                 branch: info.branch.and_then(|v| v.as_str().map(String::from)),
-                optifine: None,
               })
               .collect(),
           )
@@ -80,5 +79,5 @@ pub async fn get_forge_meta_by_game_version(
       }
     }
   }
-  Err(SJMCLError(String::new()))
+  Err(ResourceError::NoDownloadApi.into())
 }

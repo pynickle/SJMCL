@@ -256,9 +256,9 @@ pub async fn refresh_instances(
           version: loader_version.unwrap_or_default(),
           status: ModLoaderStatus::Installed,
           branch: None,
-          optifine: optifine_info.clone(),
         }
       },
+      optifine: optifine_info.clone(),
       ..cfg_read
     };
     // ignore error here, for now

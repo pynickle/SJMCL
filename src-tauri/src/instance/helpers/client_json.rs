@@ -1,7 +1,7 @@
 use crate::error::{SJMCLError, SJMCLResult};
 use crate::instance::models::misc::{Instance, ModLoaderType};
 use crate::launcher_config::models::LauncherConfig;
-use crate::resource::models::OptifineResourceInfo;
+use crate::resource::models::OptiFineResourceInfo;
 use crate::utils::fs::get_app_resource_filepath;
 use regex::RegexBuilder;
 use serde::{Deserialize, Deserializer, Serialize};
@@ -310,13 +310,12 @@ pub fn patches_to_info(
   Option<String>,
   Option<String>,
   ModLoaderType,
-  Option<OptifineResourceInfo>,
+  Option<OptiFineResourceInfo>,
 ) {
   let mut loader_type = ModLoaderType::Unknown;
   let mut game_version = None;
   let mut loader_version = None;
-  let mut optifine_info: Option<OptifineResourceInfo> = None;
-  println!("Patches_num: {}", patches.len());
+  let mut optifine_info: Option<OptiFineResourceInfo> = None;
   for patch in patches {
     if game_version.is_none() && patch.id == "game" {
       game_version = patch.version.clone();
@@ -328,7 +327,7 @@ pub fn patches_to_info(
       }
     }
     if patch.id == "optifine" {
-      optifine_info = Some(OptifineResourceInfo {
+      optifine_info = Some(OptiFineResourceInfo {
         patch: "".to_string(),
         filename: "".to_string(),
         r#type: patch.version.clone().unwrap_or_default(),
@@ -344,7 +343,7 @@ pub async fn libraries_to_info(
   Option<String>,
   Option<String>,
   ModLoaderType,
-  Option<OptifineResourceInfo>,
+  Option<OptiFineResourceInfo>,
 ) {
   let game_version: Option<String> = client.client_version.clone();
   let mut loader_version: Option<String> = None;
