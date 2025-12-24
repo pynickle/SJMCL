@@ -67,7 +67,7 @@ export const LoaderSelector: React.FC<LoaderSelectorProps> = ({
   const [versionList, setVersionList] = useState<OptionItemProps[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [selectedType, setSelectedType] = useState<ModLoaderType | "OptiFine">(
-    ModLoaderType.Unknown
+    selectedOptiFine ? "OptiFine" : selectedModLoader.loaderType
   );
   const [selectedId, setSelectedId] = useState("");
 
