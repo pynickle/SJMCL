@@ -67,9 +67,20 @@ export const LoaderSelector: React.FC<LoaderSelectorProps> = ({
   const [versionList, setVersionList] = useState<OptionItemProps[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [selectedType, setSelectedType] = useState<ModLoaderType | "OptiFine">(
-    selectedOptiFine ? "OptiFine" : selectedModLoader.loaderType
+    ModLoaderType.Unknown
   );
   const [selectedId, setSelectedId] = useState("");
+
+  useEffect(() => {
+    if (selectedOptiFine) {
+      setSelectedType("OptiFine");
+      setSelectedId(selectedOptiFine ? selectedOptiFine.filename : "");
+    } else {
+      setSelectedType(selectedModLoader.loaderType);
+      setSelectedId(selectedModLoader.version);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   function isModLoaderResourceInfo(
     version: ModLoaderResourceInfo | OptiFineResourceInfo
