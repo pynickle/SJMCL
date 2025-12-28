@@ -18,7 +18,7 @@ on:
         description: 'Git branch to checkout'
         required: false
         type: string
-        default: 'main'
+        default: '' # leave empty to use the triggering ref
     secrets:
       SJMCL_CURSEFORGE_API_KEY:
         required: true
@@ -63,7 +63,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ inputs.branch }}
+          ref: ${{ inputs.branch || github.ref || 'main' }} 
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -90,9 +90,7 @@ jobs:
 
       - name: Install frontend dependencies
         run: |
-          npm install -g pnpm
-          pnpm import
-          pnpm install
+          npm install
 
       - name: Remove Font files (MacOS)
         if: matrix.platform == 'macos'
@@ -106,15 +104,8 @@ jobs:
           workspaces: "./src-tauri -> target"
           key: ${{ matrix.platform }}-${{ matrix.target }}
 
-      - name: Build the app (MacOS)
-        if: matrix.platform == 'macos'
-        run: pnpm run tauri build --bundles app --target ${{ matrix.target }}
-        env:
-          SJMCL_CURSEFORGE_API_KEY: ${{ secrets.SJMCL_CURSEFORGE_API_KEY }}
-
       - name: Build the app
-        if: matrix.platform != 'macos'
-        run: pnpm run tauri build --target ${{ matrix.target }}
+        run: npm run tauri build -- --target ${{ matrix.target }}
         env:
           SJMCL_CURSEFORGE_API_KEY: ${{ secrets.SJMCL_CURSEFORGE_API_KEY }}
 
@@ -130,7 +121,7 @@ jobs:
             python scripts/release/bundle_portable_assets.py -p "src-tauri/target/${{ matrix.target }}/release/" "SJMCL.exe"
             # For Windows, copy the portable exe
             mv "src-tauri/target/${{ matrix.target }}/release/SJMCL-patched.exe" artifacts/"$ARTIFACT_NAME"_portable.exe
-            mv "src-tauri/target/${{ matrix.target }}/release/bundle/msi/"*.msi artifacts/"$ARTIFACT_NAME".msi
+            mv "src-tauri/target/${{ matrix.target }}/release/bundle/nsis/"*.exe artifacts/"$ARTIFACT_NAME"_setup.exe
             ls -la artifacts
           elif [ "${{ matrix.platform }}" = "macos" ]; then
             ls src-tauri/target/${{ matrix.target }}/release/bundle/macos
