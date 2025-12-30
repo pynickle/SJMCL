@@ -3,8 +3,9 @@ use crate::instance::helpers::client_jar::load_game_version_from_jar;
 use crate::instance::helpers::client_json::{libraries_to_info, patches_to_info, McClientInfo};
 use crate::instance::helpers::loader::forge::download_forge_libraries;
 use crate::instance::helpers::loader::neoforge::download_neoforge_libraries;
+use crate::instance::helpers::loader::optifine::download_optifine_libraries_and_patch;
 use crate::instance::models::misc::{
-  Instance, InstanceError, InstanceSubdirType, ModLoader, ModLoaderStatus, ModLoaderType,
+  Instance, InstanceError, InstanceSubdirType, ModLoader, ModLoaderStatus, ModLoaderType, OptiFine,
 };
 use crate::launcher_config::helpers::misc::get_global_game_config;
 use crate::launcher_config::models::{GameConfig, GameDirectory, LauncherConfig};
@@ -154,7 +155,7 @@ pub async fn refresh_instances(
       continue; // not a valid instance
     }
 
-    let client_data = match load_json_async::<McClientInfo>(&json_path).await {
+    let mut client_data = match load_json_async::<McClientInfo>(&json_path).await {
       Ok(v) => v,
       Err(e) => {
         println!("Failed to load client info for {}: {}", name, e);
@@ -186,25 +187,34 @@ pub async fn refresh_instances(
       };
       if let Err(e) = {
         match cfg_read.mod_loader.status {
-          ModLoaderStatus::NotDownloaded => match cfg_read.mod_loader.loader_type {
-            ModLoaderType::Forge => {
-              cfg_read.mod_loader.status = ModLoaderStatus::Downloading;
-              download_forge_libraries(app, &priority_list, &cfg_read, &client_data, false).await
+          ModLoaderStatus::NotDownloaded => {
+            match cfg_read.mod_loader.loader_type {
+              ModLoaderType::Forge => {
+                cfg_read.mod_loader.status = ModLoaderStatus::Downloading;
+                download_forge_libraries(app, &priority_list, &cfg_read, &mut client_data).await?;
+              }
+              ModLoaderType::NeoForge => {
+                cfg_read.mod_loader.status = ModLoaderStatus::Downloading;
+                download_neoforge_libraries(app, &priority_list, &cfg_read, &mut client_data)
+                  .await?;
+              }
+              _ => {}
             }
-            ModLoaderType::NeoForge => {
-              cfg_read.mod_loader.status = ModLoaderStatus::Downloading;
-              download_neoforge_libraries(app, &priority_list, &cfg_read, &client_data, false).await
-            }
-            _ => Ok(()),
-          },
+            let vjson_path = cfg_read
+              .version_path
+              .join(format!("{}.json", cfg_read.name));
+            fs::write(vjson_path, serde_json::to_vec_pretty(&client_data)?)?;
+
+            Ok(())
+          }
           ModLoaderStatus::DownloadFailed => match cfg_read.mod_loader.loader_type {
             ModLoaderType::Forge => {
               cfg_read.mod_loader.status = ModLoaderStatus::Downloading;
-              download_forge_libraries(app, &priority_list, &cfg_read, &client_data, true).await
+              download_forge_libraries(app, &priority_list, &cfg_read, &mut client_data).await
             }
             ModLoaderType::NeoForge => {
               cfg_read.mod_loader.status = ModLoaderStatus::Downloading;
-              download_neoforge_libraries(app, &priority_list, &cfg_read, &client_data, true).await
+              download_neoforge_libraries(app, &priority_list, &cfg_read, &mut client_data).await
             }
             _ => Ok(()),
           },
@@ -220,6 +230,52 @@ pub async fn refresh_instances(
       } {
         log::warn!("Failed to install mod loader for {}: {:?}", name, e);
         cfg_read.mod_loader.status = ModLoaderStatus::DownloadFailed;
+        cfg_read.save_json_cfg().await?;
+        continue;
+      }
+    }
+    if cfg_read
+      .optifine
+      .as_ref()
+      .map_or(false, |o| o.status != ModLoaderStatus::Installed)
+    {
+      let priority_list = {
+        let launcher_config_state = app.state::<Mutex<LauncherConfig>>();
+        let launcher_config = launcher_config_state.lock()?;
+        get_source_priority_list(&launcher_config)
+      };
+      println!("Start OptiFine installation for instance: {}", name);
+      if let Err(e) = {
+        let of_status = cfg_read.optifine.as_ref().map(|o| o.status.clone());
+        match of_status {
+          Some(ModLoaderStatus::NotDownloaded) => {
+            download_optifine_libraries_and_patch(app, &priority_list, &cfg_read, &mut client_data)
+              .await?;
+            let vjson_path = cfg_read
+              .version_path
+              .join(format!("{}.json", cfg_read.name));
+            fs::write(vjson_path, serde_json::to_vec_pretty(&client_data)?)?;
+            Ok(())
+          }
+          Some(ModLoaderStatus::DownloadFailed) => {
+            download_optifine_libraries_and_patch(app, &priority_list, &cfg_read, &mut client_data)
+              .await
+          }
+          Some(ModLoaderStatus::Downloading) | Some(ModLoaderStatus::Installing) => {
+            if is_first_run {
+              if let Some(o) = &mut cfg_read.optifine {
+                o.status = ModLoaderStatus::DownloadFailed;
+              }
+            }
+            Ok(())
+          }
+          _ => Ok(()),
+        }
+      } {
+        log::warn!("Failed to install OptiFine for {}: {:?}", name, e);
+        if let Some(o) = &mut cfg_read.optifine {
+          o.status = ModLoaderStatus::DownloadFailed;
+        }
         cfg_read.save_json_cfg().await?;
         continue;
       }
@@ -243,11 +299,18 @@ pub async fn refresh_instances(
       cfg_read.icon_src = loader_type.to_icon_path().to_string();
     }
 
+    let mod_loader_installed = cfg_read.mod_loader.status == ModLoaderStatus::Installed;
+    let optifine_installed = cfg_read
+      .optifine
+      .as_ref()
+      .map_or(false, |o| o.status == ModLoaderStatus::Installed);
+    let optifine_filename = optifine_info.as_ref().map(|info| info.filename.clone());
+    let optifine_version = optifine_info.map(|info| format!("{}_{}", info.r#type, info.patch));
     let instance = Instance {
       name,
       version: game_version.unwrap_or_default(),
       version_path,
-      mod_loader: if cfg_read.mod_loader.status != ModLoaderStatus::Installed {
+      mod_loader: if !mod_loader_installed {
         // pass mod loader check if download is not ready
         cfg_read.mod_loader
       } else {
@@ -258,7 +321,15 @@ pub async fn refresh_instances(
           branch: None,
         }
       },
-      optifine: optifine_info.clone(),
+      optifine: if !optifine_installed {
+        cfg_read.optifine.clone()
+      } else {
+        Some(OptiFine {
+          filename: optifine_filename.unwrap_or_default(),
+          version: optifine_version.unwrap_or_default(),
+          status: ModLoaderStatus::Installed,
+        })
+      },
       ..cfg_read
     };
     // ignore error here, for now
@@ -281,6 +352,7 @@ pub async fn refresh_all_instances(
     match refresh_instances(app, game_directory, is_first_run).await {
       Ok(vs) => {
         for mut instance in vs {
+          println!("composed id: {}:{}", dir_name, instance.name);
           let composed_id = format!("{}:{}", dir_name, instance.name);
           instance.id = composed_id.clone();
           instance_map.insert(composed_id, instance);

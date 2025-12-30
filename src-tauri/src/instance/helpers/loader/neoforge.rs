@@ -72,8 +72,7 @@ pub async fn download_neoforge_libraries(
   app: &AppHandle,
   priority: &[SourceType],
   instance: &Instance,
-  client_info: &McClientInfo,
-  is_retry: bool, // do not modify client info, just download necessary files
+  client_info: &mut McClientInfo,
 ) -> SJMCLResult<()> {
   let subdirs = get_instance_subdir_paths(
     app,
@@ -85,8 +84,6 @@ pub async fn download_neoforge_libraries(
     return Err(InstanceError::InvalidSourcePath.into());
   };
   let mut task_params = vec![];
-
-  let mut client_info = client_info.clone();
 
   let name = if instance.mod_loader.version.starts_with("1.20.1-") {
     "forge"
@@ -341,11 +338,5 @@ pub async fn download_neoforge_libraries(
   )
   .await?;
 
-  if !is_retry {
-    let vjson_path = instance
-      .version_path
-      .join(format!("{}.json", instance.name));
-    fs::write(vjson_path, serde_json::to_vec_pretty(&client_info)?)?;
-  }
   Ok(())
 }

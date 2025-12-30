@@ -5,7 +5,7 @@ use crate::instance::helpers::client_json::{replace_native_libraries, McClientIn
 use crate::instance::helpers::game_version::{build_game_version_cmp_fn, compare_game_versions};
 use crate::instance::helpers::loader::common::{execute_processors, install_mod_loader};
 use crate::instance::helpers::loader::forge::InstallProfile;
-use crate::instance::helpers::loader::optifine::install_optifine;
+use crate::instance::helpers::loader::optifine::{finish_optifine_installer, install_optifine};
 use crate::instance::helpers::misc::{
   get_instance_game_config, get_instance_subdir_path_by_id, get_instance_subdir_paths,
   refresh_and_update_instances, unify_instance_name,
@@ -27,7 +27,8 @@ use crate::instance::helpers::server::{
 use crate::instance::helpers::world::{load_level_data_from_nbt, load_world_info_from_dir};
 use crate::instance::models::misc::{
   Instance, InstanceError, InstanceSubdirType, InstanceSummary, LocalModInfo, ModLoader,
-  ModLoaderStatus, ModLoaderType, ResourcePackInfo, SchematicInfo, ScreenshotInfo, ShaderPackInfo,
+  ModLoaderStatus, ModLoaderType, OptiFine, ResourcePackInfo, SchematicInfo, ScreenshotInfo,
+  ShaderPackInfo,
 };
 use crate::instance::models::world::base::WorldInfo;
 use crate::instance::models::world::level::LevelData;
@@ -882,6 +883,11 @@ pub async fn create_instance(
   if version_path.exists() {
     return Err(InstanceError::ConflictNameError.into());
   }
+  let optifine_info = optifine.as_ref().map(|info| OptiFine {
+    filename: info.filename.clone(),
+    version: format!("{}_{}", info.r#type, info.patch),
+    status: ModLoaderStatus::NotDownloaded,
+  });
 
   // Create instance config
   let instance = Instance {
@@ -902,7 +908,7 @@ pub async fn create_instance(
       version: mod_loader.version.clone(),
       branch: mod_loader.branch.clone(),
     },
-    optifine,
+    optifine: optifine_info,
     description,
     icon_src,
     starred: false,
@@ -989,11 +995,11 @@ pub async fn create_instance(
     .await?;
   }
 
-  if let Some(optifine_info) = &instance.optifine {
+  if let Some(info) = optifine.as_ref() {
     install_optifine(
       &priority_list,
       &instance.version,
-      optifine_info,
+      info,
       libraries_dir.to_path_buf(),
       &mut task_params,
     )
@@ -1095,6 +1101,32 @@ pub async fn finish_mod_loader_install(app: AppHandle, instance_id: String) -> S
     execute_processors(&app, &instance, &client_info, &install_profile).await?;
   }
 
+  if let Some(optifine) = &instance.optifine {
+    println!("Finish optifine installation for instance: {}", instance_id);
+    match optifine.status {
+      // prevent duplicated installation
+      ModLoaderStatus::DownloadFailed => {
+        return Err(InstanceError::ProcessorExecutionFailed.into());
+      }
+      ModLoaderStatus::Installing => {
+        return Err(InstanceError::InstallationDuplicated.into());
+      }
+      ModLoaderStatus::Installed => {
+        return Ok(());
+      }
+      _ => {}
+    }
+    {
+      let binding = app.state::<Mutex<HashMap<String, Instance>>>();
+      let mut state = binding.lock()?;
+      let instance = state
+        .get_mut(&instance_id)
+        .ok_or(InstanceError::InstanceNotFoundByID)?;
+      instance.optifine.as_mut().unwrap().status = ModLoaderStatus::Installing;
+    };
+    finish_optifine_installer(&app, &instance, &client_info).await?;
+  }
+
   let instance = {
     let binding = app.state::<Mutex<HashMap<String, Instance>>>();
     let mut state = binding.lock()?;
@@ -1102,6 +1134,9 @@ pub async fn finish_mod_loader_install(app: AppHandle, instance_id: String) -> S
       .get_mut(&instance_id)
       .ok_or(InstanceError::InstanceNotFoundByID)?;
     instance.mod_loader.status = ModLoaderStatus::Installed;
+    if let Some(optifine) = &mut instance.optifine {
+      optifine.status = ModLoaderStatus::Installed;
+    }
     instance.clone()
   };
   instance.save_json_cfg().await?;
