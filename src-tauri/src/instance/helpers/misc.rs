@@ -3,7 +3,6 @@ use crate::instance::helpers::client_jar::load_game_version_from_jar;
 use crate::instance::helpers::client_json::{libraries_to_info, patches_to_info, McClientInfo};
 use crate::instance::helpers::loader::forge::download_forge_libraries;
 use crate::instance::helpers::loader::neoforge::download_neoforge_libraries;
-use crate::instance::helpers::loader::optifine::download_optifine_libraries_and_patch;
 use crate::instance::models::misc::{
   Instance, InstanceError, InstanceSubdirType, ModLoader, ModLoaderStatus, ModLoaderType, OptiFine,
 };
@@ -234,52 +233,6 @@ pub async fn refresh_instances(
         continue;
       }
     }
-    if cfg_read
-      .optifine
-      .as_ref()
-      .map_or(false, |o| o.status != ModLoaderStatus::Installed)
-    {
-      let priority_list = {
-        let launcher_config_state = app.state::<Mutex<LauncherConfig>>();
-        let launcher_config = launcher_config_state.lock()?;
-        get_source_priority_list(&launcher_config)
-      };
-      println!("Start OptiFine installation for instance: {}", name);
-      if let Err(e) = {
-        let of_status = cfg_read.optifine.as_ref().map(|o| o.status.clone());
-        match of_status {
-          Some(ModLoaderStatus::NotDownloaded) => {
-            download_optifine_libraries_and_patch(app, &priority_list, &cfg_read, &mut client_data)
-              .await?;
-            let vjson_path = cfg_read
-              .version_path
-              .join(format!("{}.json", cfg_read.name));
-            fs::write(vjson_path, serde_json::to_vec_pretty(&client_data)?)?;
-            Ok(())
-          }
-          Some(ModLoaderStatus::DownloadFailed) => {
-            download_optifine_libraries_and_patch(app, &priority_list, &cfg_read, &mut client_data)
-              .await
-          }
-          Some(ModLoaderStatus::Downloading) | Some(ModLoaderStatus::Installing) => {
-            if is_first_run {
-              if let Some(o) = &mut cfg_read.optifine {
-                o.status = ModLoaderStatus::DownloadFailed;
-              }
-            }
-            Ok(())
-          }
-          _ => Ok(()),
-        }
-      } {
-        log::warn!("Failed to install OptiFine for {}: {:?}", name, e);
-        if let Some(o) = &mut cfg_read.optifine {
-          o.status = ModLoaderStatus::DownloadFailed;
-        }
-        cfg_read.save_json_cfg().await?;
-        continue;
-      }
-    }
 
     let (mut game_version, loader_version, loader_type, optifine_info) =
       if !client_data.patches.is_empty() {
@@ -352,7 +305,6 @@ pub async fn refresh_all_instances(
     match refresh_instances(app, game_directory, is_first_run).await {
       Ok(vs) => {
         for mut instance in vs {
-          println!("composed id: {}:{}", dir_name, instance.name);
           let composed_id = format!("{}:{}", dir_name, instance.name);
           instance.id = composed_id.clone();
           instance_map.insert(composed_id, instance);

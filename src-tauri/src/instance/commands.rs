@@ -5,7 +5,9 @@ use crate::instance::helpers::client_json::{replace_native_libraries, McClientIn
 use crate::instance::helpers::game_version::{build_game_version_cmp_fn, compare_game_versions};
 use crate::instance::helpers::loader::common::{execute_processors, install_mod_loader};
 use crate::instance::helpers::loader::forge::InstallProfile;
-use crate::instance::helpers::loader::optifine::{finish_optifine_installer, install_optifine};
+use crate::instance::helpers::loader::optifine::{
+  download_optifine_installer, finish_optifine_installer,
+};
 use crate::instance::helpers::misc::{
   get_instance_game_config, get_instance_subdir_path_by_id, get_instance_subdir_paths,
   refresh_and_update_instances, unify_instance_name,
@@ -996,7 +998,7 @@ pub async fn create_instance(
   }
 
   if let Some(info) = optifine.as_ref() {
-    install_optifine(
+    download_optifine_installer(
       &priority_list,
       &instance.version,
       info,
@@ -1102,7 +1104,6 @@ pub async fn finish_mod_loader_install(app: AppHandle, instance_id: String) -> S
   }
 
   if let Some(optifine) = &instance.optifine {
-    println!("Finish optifine installation for instance: {}", instance_id);
     match optifine.status {
       // prevent duplicated installation
       ModLoaderStatus::DownloadFailed => {

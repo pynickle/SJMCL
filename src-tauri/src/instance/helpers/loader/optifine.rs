@@ -3,7 +3,7 @@ use crate::instance::helpers::client_json::{ArgumentsItem, LaunchArgumentTemplat
 use crate::instance::helpers::client_json::{LibrariesValue, McClientInfo};
 use crate::instance::helpers::loader::common::add_library_entry;
 use crate::instance::helpers::misc::{get_instance_game_config, get_instance_subdir_paths};
-use crate::instance::models::misc::{Instance, InstanceError, InstanceSubdirType};
+use crate::instance::models::misc::{Instance, InstanceError, InstanceSubdirType, ModLoaderType};
 use crate::launch::helpers::file_validator::convert_library_name_to_path;
 use crate::launch::helpers::jre_selector::select_java_runtime;
 use crate::launcher_config::models::JavaInfo;
@@ -21,7 +21,7 @@ use std::process::Command;
 use std::sync::Mutex;
 use tauri::{AppHandle, Manager};
 use zip::{write::FileOptions, ZipArchive, ZipWriter};
-pub async fn install_optifine(
+pub async fn download_optifine_installer(
   priority: &[SourceType],
   game_version: &str,
   optifine: &OptiFineResourceInfo,
@@ -58,12 +58,13 @@ pub async fn install_optifine(
   Ok(())
 }
 
-pub async fn download_optifine_libraries_and_patch(
+async fn download_optifine_libraries(
   app: &AppHandle,
   priority: &[SourceType],
   instance: &Instance,
-  client_info: &mut McClientInfo,
+  client_info: &McClientInfo,
 ) -> SJMCLResult<()> {
+  let mut client_info = client_info.clone();
   let optifine = instance
     .optifine
     .as_ref()
@@ -180,10 +181,18 @@ pub async fn download_optifine_libraries_and_patch(
       value: vec!["--tweakClass".to_string()],
       rules: vec![],
     };
-    let val = ArgumentsItem {
-      value: vec!["optifine.OptiFineTweaker".to_string()],
-      rules: vec![],
+    let val = if instance.mod_loader.loader_type == ModLoaderType::Forge {
+      ArgumentsItem {
+        value: vec!["optifine.OptiFineForgeTweaker".to_string()],
+        rules: vec![],
+      }
+    } else {
+      ArgumentsItem {
+        value: vec!["optifine.OptiFineTweaker".to_string()],
+        rules: vec![],
+      }
     };
+
     if let Some(pos) = g.iter().position(|item| {
       item
         .value
@@ -208,7 +217,11 @@ pub async fn download_optifine_libraries_and_patch(
     if !s.is_empty() && !s.ends_with(' ') {
       s.push(' ');
     }
-    s.push_str("--tweakClass optifine.OptiFineTweaker");
+    if instance.mod_loader.loader_type == ModLoaderType::Forge {
+      s.push_str("--tweakClass optifine.OptiFineForgeTweaker");
+    } else {
+      s.push_str("--tweakClass optifine.OptiFineTweaker");
+    }
     client_info.minecraft_arguments = Some(s);
   };
 
@@ -266,6 +279,11 @@ pub async fn download_optifine_libraries_and_patch(
     )
     .await?;
   }
+
+  let vjson_path = instance
+    .version_path
+    .join(format!("{}.json", instance.name));
+  fs::write(vjson_path, serde_json::to_vec_pretty(&client_info)?)?;
 
   Ok(())
 }
@@ -374,17 +392,20 @@ pub async fn finish_optifine_installer(
     fs::copy(&installer_path, &optifine_path)?;
   }
 
-  remove_entry_from_zip_inplace(&optifine_path, "META-INF/mods.toml")?;
+  remove_entry_from_zip(&optifine_path, "META-INF/mods.toml")?;
 
   let priority_list = {
     let launcher_config_state = app.state::<Mutex<LauncherConfig>>();
     let launcher_config = launcher_config_state.lock()?;
     get_source_priority_list(&launcher_config)
   };
+
+  download_optifine_libraries(app, &priority_list, &instance, &client_info).await?;
+
   Ok(())
 }
 
-fn remove_entry_from_zip_inplace(zip_path: &Path, entry_name: &str) -> SJMCLResult<()> {
+fn remove_entry_from_zip(zip_path: &Path, entry_name: &str) -> SJMCLResult<()> {
   if !zip_path.exists() {
     return Ok(());
   }

@@ -11,7 +11,6 @@ use crate::instance::helpers::client_json::{LibrariesValue, McClientInfo};
 use crate::instance::helpers::loader::fabric::install_fabric_loader;
 use crate::instance::helpers::loader::forge::{install_forge_loader, InstallProfile};
 use crate::instance::helpers::loader::neoforge::install_neoforge_loader;
-use crate::instance::helpers::loader::optifine::install_optifine;
 use crate::instance::helpers::misc::get_instance_game_config;
 use crate::instance::models::misc::{Instance, InstanceError, ModLoader, ModLoaderType};
 use crate::launch::helpers::file_validator::merge_library_lists;
