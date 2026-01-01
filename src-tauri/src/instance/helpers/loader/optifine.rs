@@ -433,21 +433,17 @@ fn remove_entry_from_zip(zip_path: &Path, entry_name: &str) -> SJMCLResult<()> {
     if name == entry_name {
       continue;
     }
-
     if name.ends_with('/') {
       writer.add_directory(name, FileOptions::<()>::default())?;
       continue;
     }
 
-    let mut options = FileOptions::<()>::default().compression_method(file.compression());
-
+    let options = FileOptions::<()>::default().compression_method(file.compression());
     writer.start_file(name, options)?;
-
     io::copy(&mut file, &mut writer)?;
   }
 
   writer.finish()?;
-
   fs::rename(&tmp_path, zip_path)?;
 
   Ok(())
