@@ -223,10 +223,11 @@ async fn get_neoforge_meta_by_game_version_bmcl(
             manifest
               .into_iter()
               .map(|info| {
-                let stable = !info.version.ends_with("beta");
+                let version = info.version;
+                let stable = !version.contains("beta") && !version.contains("alpha");
                 ModLoaderResourceInfo {
                   loader_type: ModLoaderType::NeoForge,
-                  version: info.version,
+                  version,
                   description: String::new(),
                   stable,
                   branch: None,
