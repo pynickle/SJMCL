@@ -81,7 +81,7 @@ pub enum ModLoaderStatus {
 
 structstruck::strike! {
   #[strikethrough[derive(Debug, PartialEq, Eq, Clone, Deserialize, Serialize, Default)]]
-  #[strikethrough[serde(rename_all = "camelCase", deny_unknown_fields, default)]]
+  #[strikethrough[serde(rename_all = "camelCase", default)]]
   pub struct Instance {
     pub id: String,
     pub name: String,
@@ -135,6 +135,7 @@ pub struct InstanceSummary {
   pub version: String,
   pub major_version: String,
   pub mod_loader: ModLoader,
+  pub optifine: Option<OptiFine>,
   pub support_quick_play: bool,
   pub use_spec_game_config: bool,
   pub is_version_isolated: bool,
@@ -157,6 +158,7 @@ impl InstanceSummary {
       version_path: instance.version_path.clone(),
       version: instance.version.clone(),
       mod_loader: instance.mod_loader.clone(),
+      optifine: instance.optifine.clone(),
       // skip fallback remote fetch in `get_major_game_version` and `compare_game_versions` to avoid instance list load delay.
       // ref: https://github.com/UNIkeEN/SJMCL/pull/799
       major_version: get_major_game_version(app, &instance.version, false).await,

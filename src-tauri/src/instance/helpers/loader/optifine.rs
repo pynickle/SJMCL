@@ -343,7 +343,7 @@ pub async fn finish_optifine_installer(
   instance: &Instance,
   client_info: &McClientInfo,
 ) -> SJMCLResult<()> {
-  let subdirs = get_instance_subdir_paths(&app, &instance, &[&InstanceSubdirType::Libraries])
+  let subdirs = get_instance_subdir_paths(app, instance, &[&InstanceSubdirType::Libraries])
     .ok_or(InstanceError::InstanceNotFoundByID)?;
   let libraries_dir = subdirs.first().ok_or(InstanceError::InstanceNotFoundByID)?;
   let optifine = instance
@@ -367,11 +367,7 @@ pub async fn finish_optifine_installer(
   let mut archive = ZipArchive::new(f)?;
 
   let candidate = "optifine/Patcher.class";
-  let has_patcher = if archive.by_name(candidate).is_ok() {
-    true
-  } else {
-    false
-  };
+  let has_patcher = archive.by_name(candidate).is_ok();
 
   let base_client_jar = instance.version_path.join(format!("{}.jar", instance.name));
 
@@ -400,7 +396,7 @@ pub async fn finish_optifine_installer(
     get_source_priority_list(&launcher_config)
   };
 
-  download_optifine_libraries(app, &priority_list, &instance, &client_info).await?;
+  download_optifine_libraries(app, &priority_list, instance, client_info).await?;
 
   Ok(())
 }

@@ -1243,6 +1243,10 @@
     }
   },
   "InstanceShaderPacksPage": {
+    "shaderLoaderList": {
+      "title": "Loaders",
+      "notInstalled": "Not Installed"
+    },
     "shaderPackList": {
       "title": "Shader Packs"
     }
@@ -1364,8 +1368,8 @@
     "stable": "Stable",
     "beta": "Beta",
     "releaseDate": "Released at {{date}}",
-    "notCompatibleWith":"Not compatible with {{item}}",
-    "noVersionSelected":"No version selected"
+    "notCompatibleWith": "Not compatible with {{item}}",
+    "noVersionSelected": "No version selected"
   },
   "ManageSkinModal": {
     "skinManage": "Manage Skin",
