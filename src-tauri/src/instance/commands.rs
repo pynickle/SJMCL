@@ -6,7 +6,7 @@ use crate::instance::helpers::game_version::{build_game_version_cmp_fn, compare_
 use crate::instance::helpers::loader::common::{execute_processors, install_mod_loader};
 use crate::instance::helpers::loader::forge::InstallProfile;
 use crate::instance::helpers::loader::optifine::{
-  download_optifine_installer, finish_optifine_installer,
+  download_optifine_installer, finish_optifine_install,
 };
 use crate::instance::helpers::misc::{
   get_instance_game_config, get_instance_subdir_path_by_id, get_instance_subdir_paths,
@@ -982,6 +982,7 @@ pub async fn create_instance(
   task_params
     .extend(get_invalid_assets(&app, &version_info, priority_list[0], assets_dir, false).await?);
 
+  // download loader (installer)
   if instance.mod_loader.loader_type != ModLoaderType::Unknown {
     install_mod_loader(
       app.clone(),
@@ -999,7 +1000,6 @@ pub async fn create_instance(
 
   if let Some(info) = optifine.as_ref() {
     download_optifine_installer(
-      &priority_list,
       &instance.version,
       info,
       libraries_dir.to_path_buf(),
@@ -1125,7 +1125,7 @@ pub async fn finish_mod_loader_install(app: AppHandle, instance_id: String) -> S
         .ok_or(InstanceError::InstanceNotFoundByID)?;
       instance.optifine.as_mut().unwrap().status = ModLoaderStatus::Installing;
     };
-    finish_optifine_installer(&app, &instance, &client_info).await?;
+    finish_optifine_install(&app, &instance, &client_info).await?;
   }
 
   let instance = {

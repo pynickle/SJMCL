@@ -2365,7 +2365,8 @@
             "INSTANCE_NOT_FOUND_BY_ID": "实例 ID 不存在",
             "INSTALLATION_DUPLICATED": "检测到另一个进程已在安装中",
             "MAIN_CLASS_NOT_FOUND": "主类未找到",
-            "PROCESSOR_EXECUTION_FAILED": "安装任务执行失败"
+            "PROCESSOR_EXECUTION_FAILED": "安装任务执行失败",
+            "LOADER_INSTALLER_NOT_FOUND": "加载器安装程序不存在"
           }
         }
       },

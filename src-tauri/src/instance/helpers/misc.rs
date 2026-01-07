@@ -256,7 +256,7 @@ pub async fn refresh_instances(
     let optifine_installed = cfg_read
       .optifine
       .as_ref()
-      .map_or(false, |o| o.status == ModLoaderStatus::Installed);
+      .is_some_and(|o| o.status == ModLoaderStatus::Installed);
     let optifine_filename = optifine_info.as_ref().map(|info| info.filename.clone());
     let optifine_version = optifine_info.map(|info| format!("{}_{}", info.r#type, info.patch));
     let instance = Instance {

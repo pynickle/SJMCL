@@ -21,13 +21,14 @@ use std::process::Command;
 use std::sync::Mutex;
 use tauri::{AppHandle, Manager};
 use zip::{write::FileOptions, ZipArchive, ZipWriter};
+
 pub async fn download_optifine_installer(
-  priority: &[SourceType],
   game_version: &str,
   optifine: &OptiFineResourceInfo,
   lib_dir: PathBuf,
   task_params: &mut Vec<PTaskParam>,
 ) -> SJMCLResult<()> {
+  // only have BMCLAPI source
   let root = get_download_api(SourceType::BMCLAPIMirror, ResourceType::OptiFine)?;
   let installer_url = root.join(&format!(
     "{}/{}/{}",
@@ -330,7 +331,7 @@ async fn run_optifine_patcher(
   Ok(())
 }
 
-pub async fn finish_optifine_installer(
+pub async fn finish_optifine_install(
   app: &AppHandle,
   instance: &Instance,
   client_info: &McClientInfo,

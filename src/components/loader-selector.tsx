@@ -295,9 +295,15 @@ export const LoaderSelector: React.FC<LoaderSelectorProps> = ({
 
   return (
     <HStack {...props} w="100%" h="100%" spacing={4} overflow="hidden">
-      <VStack spacing={3.5} h="100%" overflowY="auto" flexShrink={0}>
+      <VStack
+        spacing={3.5}
+        h="100%"
+        overflowY="auto"
+        overflowX="hidden"
+        flexShrink={0}
+      >
         {selectableCardItems.map((item, index) => (
-          <SelectableCard key={index} {...item} minW="max-content" w="100%" />
+          <SelectableCard key={index} {...item} minW="3xs" w="100%" />
         ))}
       </VStack>
       <Section overflow="auto" flexGrow={1} w="100%" h="100%">

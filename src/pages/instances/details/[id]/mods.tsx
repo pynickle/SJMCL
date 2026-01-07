@@ -49,6 +49,7 @@ import { LocalModInfo } from "@/models/instance/misc";
 import { InstanceService } from "@/services/instance";
 import { ResourceService } from "@/services/resource";
 import { UtilsService } from "@/services/utils";
+import { parseModLoaderVersion } from "@/utils/instance";
 import { base64ImgSrc } from "@/utils/string";
 
 const InstanceModsPage = () => {
@@ -355,7 +356,7 @@ const InstanceModsPage = () => {
       iconSrc: `/images/icons/${modLoaderTypesToIcon[type]}`,
       description:
         summary?.modLoader.loaderType === type
-          ? summary?.modLoader.version
+          ? parseModLoaderVersion(summary?.modLoader.version || "")
           : t("InstanceModsPage.modLoaderList.notInstalled"),
       displayMode: "entry",
       isSelected: summary?.modLoader.loaderType === type,

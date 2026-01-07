@@ -118,12 +118,15 @@ const InstanceShaderPacksPage = () => {
       title: "OptiFine",
       iconSrc: "/images/icons/OptiFine.png",
       description:
-        summary?.optifine?.version ||
-        t("InstanceShaderPacksPage.shaderLoaderList.notInstalled"),
+        summary?.optifine?.status === "Installed"
+          ? summary?.optifine?.version
+          : t("InstanceShaderPacksPage.shaderLoaderList.notInstalled"),
       displayMode: "entry",
-      isSelected: summary?.optifine !== undefined,
+      isSelected: summary?.optifine?.status === "Installed",
       onSelect: () => {},
-      isDisabled: true, // TODO: add OptiFine installation support
+      // TODO: add OptiFine installation support
+      isDisabled: true,
+      isChevronShown: false,
     },
   ];
 

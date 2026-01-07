@@ -2365,7 +2365,8 @@
             "INSTANCE_NOT_FOUND_BY_ID": "Instance ID does not exist",
             "INSTALLATION_DUPLICATED": "Another installation process is already in progress",
             "MAIN_CLASS_NOT_FOUND": "Main class not found in the mod loader version",
-            "PROCESSOR_EXECUTION_FAILED": "Failed to execute the install process"
+            "PROCESSOR_EXECUTION_FAILED": "Failed to execute the install process",
+            "LOADER_INSTALLER_NOT_FOUND": "Mod loader installer file not found"
           }
         }
       },
