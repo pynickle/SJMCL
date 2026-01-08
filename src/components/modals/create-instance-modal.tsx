@@ -42,6 +42,7 @@ import {
   defaultModLoaderResourceInfo,
 } from "@/models/resource";
 import { InstanceService } from "@/services/instance";
+import { parseModLoaderVersion } from "@/utils/instance";
 
 export const gameTypesToIcon: Record<string, string> = {
   release: "/images/icons/JEIcon_Release.png",
@@ -317,7 +318,8 @@ export const CreateInstanceModal: React.FC<Omit<ModalProps, "children">> = ({
               : t("LoaderSelector.noVersionSelected");
           } else {
             let desc = `${selectedModLoader.loaderType} ${
-              selectedModLoader.version || t("LoaderSelector.noVersionSelected")
+              parseModLoaderVersion(selectedModLoader.version) ||
+              t("LoaderSelector.noVersionSelected")
             }`;
             if (selectedOptiFine) {
               desc += ` + OptiFine`;
