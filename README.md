@@ -94,7 +94,7 @@ We warmly invite contributions from everyone.
 
 ## Copyright
 
-Copyright © 2024-2025 SJMCL Team.
+Copyright © 2024-2026 SJMCL Team.
 
 > NOT AN OFFICIAL MINECRAFT SERVICE. NOT APPROVED BY OR ASSOCIATED WITH MOJANG OR MICROSOFT.
 
