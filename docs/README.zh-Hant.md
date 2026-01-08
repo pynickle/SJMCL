@@ -94,7 +94,7 @@ npm run tauri dev
 
 ## 版權宣告
 
-版權所有 © 2024-2025 SJMCL 團隊。
+版權所有 © 2024-2026 SJMCL 團隊。
 
 > 本軟體並非官方 Minecraft 服務。未獲得 Mojang 或 Microsoft 批准或關聯許可。
 
