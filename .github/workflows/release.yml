@@ -178,10 +178,12 @@ jobs:
           SJMC_SECRET_KEY: ${{ secrets.SJMC_DEPLOY_SECRET_KEY }}
           SJMC_DEPLOY_API: ${{ secrets.SJMC_DEPLOY_API }}
           SJMC_DEPLOY_PROJECT: ${{ secrets.SJMC_DEPLOY_PROJECT }}
+          VERSION: ${{ needs.Version-Check.outputs.version }}
         run: |
-          cp SHA256SUMS.txt release-artifacts/SHA256SUMS_${{env.VERSION}}.txt
+          SHA256SUMS_FILE=SHA256SUMS_${{ env.VERSION }}.txt
+          cp SHA256SUMS.txt release-artifacts/${SHA256SUMS_FILE}
           bash scripts/release/upload_to_sjmc_server.sh
-          rm release-artifacts/SHA256SUMS_${{env.VERSION}}.txt
+          rm release-artifacts/${SHA256SUMS_FILE}
         shell: bash
 
       - name: Generate Changelog
