@@ -255,6 +255,8 @@ structstruck::strike! {
         #[default = true]
         pub resource_translation: bool, // only available in zh-Hans
         #[default = true]
+        pub translated_filename_prefix: bool, // only available in zh-Hans
+        #[default = true]
         pub skip_first_screen_options: bool,  // only available in zh-Hans
       },
       pub advanced: struct GeneralConfigAdvanced {

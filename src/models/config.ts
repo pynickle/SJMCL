@@ -118,6 +118,7 @@ export interface LauncherConfig {
       instancesNavType: string;
       launchPageQuickSwitch: boolean;
       resourceTranslation: boolean;
+      translatedFilenamePrefix: boolean;
       skipFirstScreenOptions: boolean;
     };
     advanced: {
@@ -274,6 +275,7 @@ export const defaultConfig: LauncherConfig = {
       instancesNavType: "instance",
       launchPageQuickSwitch: true,
       resourceTranslation: true,
+      translatedFilenamePrefix: true,
       skipFirstScreenOptions: false,
     },
     advanced: {

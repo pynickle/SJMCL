@@ -163,6 +163,28 @@ const GeneralSettingsPage = () => {
               },
               {
                 title: t(
+                  "GeneralSettingsPage.functions.settings.translatedFilenamePrefix.title"
+                ),
+                description: t(
+                  "GeneralSettingsPage.functions.settings.translatedFilenamePrefix.description"
+                ),
+                children: (
+                  <Switch
+                    colorScheme={primaryColor}
+                    isChecked={
+                      generalConfigs.functionality.translatedFilenamePrefix
+                    }
+                    onChange={(e) => {
+                      update(
+                        "general.functionality.translatedFilenamePrefix",
+                        e.target.checked
+                      );
+                    }}
+                  />
+                ),
+              },
+              {
+                title: t(
                   "GeneralSettingsPage.functions.settings.skipFirstScreenOptions.title"
                 ),
                 description: t(
