@@ -85,6 +85,9 @@ const DownloadSpecificResourceModal: React.FC<
   const showZhTrans =
     config.general.general.language === "zh-Hans" &&
     config.general.functionality.resourceTranslation;
+  const addPrefix =
+    config.general.general.language === "zh-Hans" &&
+    config.general.functionality.translatedFilenamePrefix;
 
   const [gameVersionList, setGameVersionList] = useState<string[]>([]);
   const [versionLabels, setVersionLabels] = useState<string[]>([]);
@@ -198,7 +201,9 @@ const DownloadSpecificResourceModal: React.FC<
   ) => {
     const dir = await getDefaultFilePath();
     const fileName = sanitizeFileName(
-      translatedName ? `[${translatedName}] ${item.fileName}` : item.fileName
+      addPrefix && translatedName
+        ? `[${translatedName}] ${item.fileName}`
+        : item.fileName
     );
     const savepath = await save({
       defaultPath: dir + "/" + fileName,

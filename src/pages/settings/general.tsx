@@ -3,6 +3,7 @@ import { appLogDir } from "@tauri-apps/api/path";
 import { openPath } from "@tauri-apps/plugin-opener";
 import React from "react";
 import { Trans, useTranslation } from "react-i18next";
+import { LuLanguages } from "react-icons/lu";
 import { MenuSelector } from "@/components/common/menu-selector";
 import {
   OptionItemGroup,
@@ -27,18 +28,93 @@ const GeneralSettingsPage = () => {
   const instancesNavTypes = ["instance", "directory", "hidden"];
 
   const generalSettingGroups: OptionItemGroupProps[] = [
+    // Frontend grouping was modified after discussions in PR#1299
+    // resulting in a mismatch with the backend storage structure. (TODO: migration?)
     {
-      title: t("GeneralSettingsPage.general.title"),
+      title: t("GeneralSettingsPage.language.title"),
       items: [
         {
-          title: t("GeneralSettingsPage.general.settings.language.title"),
+          title: t("GeneralSettingsPage.language.settings.language.title"),
           description: t(
-            "GeneralSettingsPage.general.settings.language.communityAck"
+            "GeneralSettingsPage.language.settings.language.communityAck"
           ),
+          prefixElement: <LuLanguages />,
           children: <LanguageMenu />,
         },
       ],
     },
+    ...(config.general.general.language == "zh-Hans"
+      ? [
+          {
+            items: [
+              {
+                title: t(
+                  "GeneralSettingsPage.language.settings.resourceTranslation.title"
+                ),
+                description: t(
+                  "GeneralSettingsPage.language.settings.resourceTranslation.description"
+                ),
+                children: (
+                  <Switch
+                    colorScheme={primaryColor}
+                    isChecked={generalConfigs.functionality.resourceTranslation}
+                    onChange={(e) => {
+                      update(
+                        "general.functionality.resourceTranslation",
+                        e.target.checked
+                      );
+                    }}
+                  />
+                ),
+              },
+              {
+                title: t(
+                  "GeneralSettingsPage.language.settings.translatedFilenamePrefix.title"
+                ),
+                description: t(
+                  "GeneralSettingsPage.language.settings.translatedFilenamePrefix.description"
+                ),
+                children: (
+                  <Switch
+                    colorScheme={primaryColor}
+                    isChecked={
+                      generalConfigs.functionality.translatedFilenamePrefix
+                    }
+                    onChange={(e) => {
+                      update(
+                        "general.functionality.translatedFilenamePrefix",
+                        e.target.checked
+                      );
+                    }}
+                  />
+                ),
+              },
+              {
+                title: t(
+                  "GeneralSettingsPage.language.settings.skipFirstScreenOptions.title"
+                ),
+                description: t(
+                  "GeneralSettingsPage.language.settings.skipFirstScreenOptions.description"
+                ),
+                children: (
+                  <Switch
+                    colorScheme={primaryColor}
+                    isChecked={
+                      generalConfigs.functionality.skipFirstScreenOptions
+                    }
+                    onChange={(e) => {
+                      update(
+                        "general.functionality.skipFirstScreenOptions",
+                        e.target.checked
+                      );
+                    }}
+                  />
+                ),
+              },
+            ],
+          },
+        ]
+      : []),
     {
       title: t("GeneralSettingsPage.functions.title"),
       items: [
@@ -137,56 +213,6 @@ const GeneralSettingsPage = () => {
         },
       ],
     },
-    ...(config.general.general.language == "zh-Hans"
-      ? [
-          {
-            items: [
-              {
-                title: t(
-                  "GeneralSettingsPage.functions.settings.resourceTranslation.title"
-                ),
-                description: t(
-                  "GeneralSettingsPage.functions.settings.resourceTranslation.description"
-                ),
-                children: (
-                  <Switch
-                    colorScheme={primaryColor}
-                    isChecked={generalConfigs.functionality.resourceTranslation}
-                    onChange={(e) => {
-                      update(
-                        "general.functionality.resourceTranslation",
-                        e.target.checked
-                      );
-                    }}
-                  />
-                ),
-              },
-              {
-                title: t(
-                  "GeneralSettingsPage.functions.settings.skipFirstScreenOptions.title"
-                ),
-                description: t(
-                  "GeneralSettingsPage.functions.settings.skipFirstScreenOptions.description"
-                ),
-                children: (
-                  <Switch
-                    colorScheme={primaryColor}
-                    isChecked={
-                      generalConfigs.functionality.skipFirstScreenOptions
-                    }
-                    onChange={(e) => {
-                      update(
-                        "general.functionality.skipFirstScreenOptions",
-                        e.target.checked
-                      );
-                    }}
-                  />
-                ),
-              },
-            ],
-          },
-        ]
-      : []),
     {
       title: t("GeneralSettingsPage.advanced.title"),
       items: [

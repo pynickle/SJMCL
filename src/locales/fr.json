@@ -923,12 +923,20 @@
     "viewOnWiki": "Voir sur Minecraft Wiki"
   },
   "GeneralSettingsPage": {
-    "general": {
-      "title": "Paramètres généraux",
+    "language": {
+      "title": "Langue",
       "settings": {
         "language": {
           "title": "Langue (Language)",
           "communityAck": "Cette langue a été traduite par la communauté. Merci à @Liulian pour sa contribution"
+        },
+        "resourceTranslation": {
+          "title": "Afficher la traduction des ressources",
+          "description": "%only available in zh-Hans"
+        },
+        "skipFirstScreenOptions": {
+          "title": "Définir automatiquement la langue de l'instance",
+          "description": "%only available in zh-Hans"
         }
       }
     },
@@ -952,14 +960,6 @@
         "launchPageQuickSwitch": {
           "title": "Basculement rapide entre instances et comptes",
           "description": "Si activé, cliquer sur le bouton de changement de la page de lancement permet de choisir directement un compte ou une instance sans changer de page"
-        },
-        "resourceTranslation": {
-          "title": "Afficher la traduction des ressources",
-          "description": "Une fois activé, essayez d'afficher la traduction en chinois simplifié du nom ou de la description (si disponible) sur l'interface de téléchargement des ressources."
-        },
-        "skipFirstScreenOptions": {
-          "title": "Définir automatiquement la langue de l'instance",
-          "description": "Une fois activé, la langue des nouvelles instances créées sera automatiquement définie sur le chinois simplifié, et la configuration des fonctionnalités d'accessibilité sera également ignorée."
         }
       }
     },

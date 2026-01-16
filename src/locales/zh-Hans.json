@@ -923,12 +923,24 @@
     "viewOnWiki": "在 Minecraft Wiki 中查看"
   },
   "GeneralSettingsPage": {
-    "general": {
-      "title": "通用设置",
+    "language": {
+      "title": "语言",
       "settings": {
         "language": {
           "title": "语言（Language）",
           "communityAck": ""
+        },
+        "resourceTranslation": {
+          "title": "显示资源翻译",
+          "description": "启用后，在资源下载界面尝试显示名称或描述的简体中文翻译（如数据可用）"
+        },
+        "translatedFilenamePrefix": {
+          "title": "资源文件名添加翻译前缀",
+          "description": "启用后，下载与更新资源时将在文件名添加简体中文译名前缀（如“[地图] map.jar”）"
+        },
+        "skipFirstScreenOptions": {
+          "title": "自动设置实例语言",
+          "description": "启用后，新建实例的语言将自动设置为简体中文，这将同时跳过辅助功能设置"
         }
       }
     },
@@ -951,14 +963,6 @@
         "launchPageQuickSwitch": {
           "title": "快捷切换实例与账户",
           "description": "启用后，点击启动页的切换按钮可直接选择账户或实例，而无需跳转页面"
-        },
-        "resourceTranslation": {
-          "title": "显示资源翻译",
-          "description": "启用后，在资源下载界面尝试显示名称或描述的简体中文翻译（如数据可用）"
-        },
-        "skipFirstScreenOptions": {
-          "title": "自动设置实例语言",
-          "description": "启用后，新建实例的语言将自动设置为简体中文，这将同时跳过辅助功能设置"
         }
       }
     },

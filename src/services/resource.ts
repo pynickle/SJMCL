@@ -156,11 +156,9 @@ export class ResourceService {
   }
 
   /**
-   * DOWNLOAD the latest mod file.
-   * @param url The download URL of the mod file.
-   * @param sha1 The SHA1 hash of the mod file.
-   * @param filePath The destination path to save the downloaded mod file.
-   * @param oldFilePath The path of the old mod file to be renamed.
+   * UPDATE mods in an instance based on the provided queries.
+   * @param instanceId The ID of the instance.
+   * @param queries The list of mod update queries.
    * @returns {Promise<InvokeResponse<void>>}
    */
   @responseHandler("resource")
