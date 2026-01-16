@@ -923,12 +923,20 @@
     "viewOnWiki": "Minecraft Wiki へ"
   },
   "GeneralSettingsPage": {
-    "general": {
-      "title": "一般設定",
+    "language": {
+      "title": "言語",
       "settings": {
         "language": {
           "title": "言語（Language）",
           "communityAck": "SJMCL のローカリゼーションはコミュニティによる提供されました。@LAR73 さんのご協力を感謝いたします"
+        },
+        "resourceTranslation": {
+          "title": "リソース翻訳",
+          "description": "中国語のみ利用できます。"
+        },
+        "skipFirstScreenOptions": {
+          "title": "インスタンス言語を自動設定",
+          "description": "中国語のみ利用できます。"
         }
       }
     },
@@ -952,14 +960,6 @@
         "launchPageQuickSwitch": {
           "title": "クイックスイッチ",
           "description": "起動ページにアカウントとインスタンスの直接選択が可能。"
-        },
-        "resourceTranslation": {
-          "title": "リソース翻訳",
-          "description": "中国語のみ利用できます。"
-        },
-        "skipFirstScreenOptions": {
-          "title": "インスタンス言語を自動設定",
-          "description": "中国語のみ利用できます。"
         }
       }
     },

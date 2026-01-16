@@ -923,12 +923,24 @@
     "viewOnWiki": "View on Minecraft Wiki"
   },
   "GeneralSettingsPage": {
-    "general": {
-      "title": "General Settings",
+    "language": {
+      "title": "Language",
       "settings": {
         "language": {
           "title": "Language",
           "communityAck": ""
+        },
+        "resourceTranslation": {
+          "title": "Resource Translation",
+          "description": "%only available in zh-Hans"
+        },
+        "translatedFilenamePrefix": {
+          "title": "Add Translation Prefix to Downloaded Resource Filenames",
+          "description": "%only available in zh-Hans"
+        },
+        "skipFirstScreenOptions": {
+          "title": "Skip First Launch Screen Options",
+          "description": "%only available in zh-Hans"
         }
       }
     },
@@ -951,18 +963,6 @@
         "launchPageQuickSwitch": {
           "title": "Quick Switch for Accounts & Instances",
           "description": "When enabled, clicking the switch button on the launch page allows direct selection of accounts and instances instead of navigating to another page."
-        },
-        "resourceTranslation": {
-          "title": "Resource Translation",
-          "description": "%only available in zh-Hans"
-        },
-        "translatedFilenamePrefix": {
-          "title": "Add Translation Prefix to Downloaded Resource Filenames",
-          "description": "%only available in zh-Hans"
-        },
-        "skipFirstScreenOptions": {
-          "title": "Skip First Launch Screen Options",
-          "description": "%only available in zh-Hans"
         }
       }
     },
