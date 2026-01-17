@@ -76,7 +76,8 @@
       "addPlayer": "添加角色",
       "add3rdPartyServer": "添加认证服务器",
       "sourceHomepage": "访问主页",
-      "deleteServer": "删除此服务器"
+      "deleteServer": "删除此服务器",
+      "importFromOtherLaunchers": "从其他启动器导入"
     },
     "playerTypeList": {
       "all": "全部来源"
@@ -899,6 +900,7 @@
     "edit": "编辑",
     "enable": "启用",
     "finish": "完成",
+    "import": "导入",
     "launch": "启动",
     "next": "下一步",
     "notice": "提示",
@@ -1147,6 +1149,22 @@
       }
     }
   },
+  "ImportAccountInfoModal": {
+    "header": {
+      "title": "从其他启动器导入账户信息"
+    },
+    "launcherDesc": {
+      "HMCL": "Hello Minecraft! Launcher"
+    },
+    "body": {
+      "authServers": "认证服务器",
+      "players": "角色"
+    },
+    "tooltips": {
+      "existingServer": "已存在相同地址的认证服务器，导入将会覆盖数据",
+      "existingPlayer": "已存在相同 UUID 的角色，导入将会覆盖数据"
+    }
+  },
   "ImportModpackModal": {
     "header": {
       "title": "导入整合包"
@@ -1159,9 +1177,6 @@
       "author": "作者",
       "modLoader": "模组加载器",
       "gameVersion": "游戏版本"
-    },
-    "button": {
-      "import": "导入"
     }
   },
   "InstanceBasicSettings": {
@@ -2050,6 +2065,20 @@
           "description": {
             "NOT_FOUND": "认证服务器不存在"
           }
+        }
+      },
+      "retrieveOtherLauncherAccountInfo": {
+        "error": {
+          "title": "获取外部账号信息失败",
+          "description": {
+            "NOT_FOUND": "读取账号信息文件错误"
+          }
+        }
+      },
+      "importExternalAccountInfo": {
+        "success": "外部账户信息导入成功",
+        "error": {
+          "title": "外部账号信息导入失败"
         }
       }
     },
