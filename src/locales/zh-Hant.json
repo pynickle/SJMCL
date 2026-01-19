@@ -76,7 +76,8 @@
       "addPlayer": "新增角色",
       "add3rdPartyServer": "新增認證伺服器",
       "sourceHomepage": "訪問主頁",
-      "deleteServer": "刪除此伺服器"
+      "deleteServer": "刪除此伺服器",
+      "importFromOtherLaunchers": "從其他啟動器匯入"
     },
     "playerTypeList": {
       "all": "全部來源"
@@ -899,6 +900,7 @@
     "edit": "編輯",
     "enable": "啟用",
     "finish": "完成",
+    "import": "匯入",
     "launch": "啟動",
     "next": "下一步",
     "notice": "提示",
@@ -923,12 +925,24 @@
     "viewOnWiki": "在 Minecraft Wiki 中檢視"
   },
   "GeneralSettingsPage": {
-    "general": {
-      "title": "通用設定",
+    "language": {
+      "title": "語言",
       "settings": {
         "language": {
           "title": "語言（Language）",
           "communityAck": ""
+        },
+        "resourceTranslation": {
+          "title": "顯示資源翻譯",
+          "description": "啟用後，在資源下載介面嘗試顯示名稱或描述的簡體中文翻譯（如資料可用）"
+        },
+        "translatedFilenamePrefix": {
+          "title": "資原始檔名新增翻譯字首",
+          "description": "啟用後，下載與更新資源時將在檔名新增簡體中文譯名字首（如“[地圖] map.jar”）"
+        },
+        "skipFirstScreenOptions": {
+          "title": "自動設定例項語言",
+          "description": "啟用後，新建例項的語言將自動設定為簡體中文，這將同時跳過輔助功能設定"
         }
       }
     },
@@ -951,14 +965,6 @@
         "launchPageQuickSwitch": {
           "title": "快捷切換例項與賬戶",
           "description": "啟用後，點選啟動頁的切換按鈕可直接選擇賬戶或例項，而無需跳轉頁面"
-        },
-        "resourceTranslation": {
-          "title": "顯示資源翻譯",
-          "description": "啟用後，在資源下載介面嘗試顯示名稱或描述的簡體中文翻譯（如資料可用）"
-        },
-        "skipFirstScreenOptions": {
-          "title": "自動設定例項語言",
-          "description": "啟用後，新建例項的語言將自動設定為簡體中文，這將同時跳過輔助功能設定"
         }
       }
     },
@@ -1143,6 +1149,22 @@
       }
     }
   },
+  "ImportAccountInfoModal": {
+    "header": {
+      "title": "從其他啟動器匯入賬戶資訊"
+    },
+    "launcherDesc": {
+      "HMCL": "Hello Minecraft! Launcher"
+    },
+    "body": {
+      "authServers": "認證伺服器",
+      "players": "角色"
+    },
+    "tooltips": {
+      "existingServer": "已存在相同地址的認證伺服器，匯入將會覆蓋資料",
+      "existingPlayer": "已存在相同 UUID 的角色，匯入將會覆蓋資料"
+    }
+  },
   "ImportModpackModal": {
     "header": {
       "title": "匯入整合包"
@@ -1155,9 +1177,6 @@
       "author": "作者",
       "modLoader": "模組載入器",
       "gameVersion": "遊戲版本"
-    },
-    "button": {
-      "import": "匯入"
     }
   },
   "InstanceBasicSettings": {
@@ -2046,6 +2065,20 @@
           "description": {
             "NOT_FOUND": "認證伺服器不存在"
           }
+        }
+      },
+      "retrieveOtherLauncherAccountInfo": {
+        "error": {
+          "title": "獲取外部賬號資訊失敗",
+          "description": {
+            "NOT_FOUND": "讀取賬號資訊檔案錯誤"
+          }
+        }
+      },
+      "importExternalAccountInfo": {
+        "success": "外部賬戶資訊匯入成功",
+        "error": {
+          "title": "外部賬號資訊匯入失敗"
         }
       }
     },
